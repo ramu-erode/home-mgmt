@@ -2,7 +2,16 @@
   "name": "@home-mgmt/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:api": "nx serve api",
+    "start:web": "nx serve web",
+    "test": "nx run-many -t test",
+    "lint": "nx run-many -t lint",
+    "db:migrate": "node apps/api/src/db/migrate.mts",
+    "db:status": "node apps/api/src/db/migrate.mts --status",
+    "db:seed": "node apps/api/src/db/seed.mts",
+    "db:codegen": "kysely-codegen --dialect postgres --camel-case --date-parser string --numeric-parser string --exclude-pattern \"kysely_*\" --out-file apps/api/src/db/schema.ts"
+  },
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~22.1.0",
@@ -30,7 +39,9 @@
     "@playwright/test": "^1.37.0",
     "@schematics/angular": "~22.1.0",
     "@swc/helpers": "~0.5.18",
+    "@types/big.js": "^7.0.0",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.23.1",
     "@typescript-eslint/utils": "^8.58.0",
     "@vitest/coverage-v8": "~4.1.0",
     "angular-eslint": "^22.1.0",
@@ -39,6 +50,7 @@
     "eslint-plugin-playwright": "^1.6.2",
     "jsdom": "^27.1.0",
     "jsonc-eslint-parser": "^2.1.0",
+    "kysely-codegen": "^0.20.0",
     "nx": "23.2.1",
     "tslib": "^2.3.0",
     "typescript": "~6.0.3",
@@ -60,6 +72,9 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "axios": "^1.6.0",
+    "big.js": "^7.0.1",
+    "kysely": "^0.29.6",
+    "pg": "^8.23.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.0"
   }

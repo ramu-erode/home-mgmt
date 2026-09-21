@@ -68,9 +68,21 @@ needs no arguments.
 
 ```bash
 psql                     # dev database (container service `db`)
+npm run db:migrate       # apply apps/api/src/db/migrations/*.sql (db:status to list)
+npm run db:seed          # load the SYNTHETIC household; idempotent
+npm run db:codegen       # regenerate src/db/schema.ts after a migration — commit it
+npm test                 # all projects; api includes schema integration tests
 npm run start:api        # NestJS: API + static Angular bundle, :3000
 npm run start:web        # Angular dev server, :4200
 ```
+
+The migration and seed scripts are `.mts` run by Node 24's type stripping —
+no build step, and the same files run on the Mac during a deploy. That means
+erasable TypeScript only: no parameter properties, enums or namespaces in them.
+
+`libs/core/src/testing/synthetic-household.json` is the single fixture behind
+both the seed and the engine's golden test. Change one, and the golden
+expectation must be re-derived by hand, not copied from the engine's output.
 
 Production Postgres is native on the always-on Mac under a LaunchDaemon
 (ADR-002) and is never reachable from here (ADR-008).

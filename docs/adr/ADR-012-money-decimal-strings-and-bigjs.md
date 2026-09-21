@@ -24,8 +24,9 @@ had no decimal library on its whitelist, so it could only use float `number`.
   its prototype and signals compare by reference, so a leaked `Big` fails in
   two different ways.
 - **Rounding happens at three named points only:**
-  - split — largest-remainder, so shares sum exactly; the residual paisa goes
-    to the highest weight, ties broken by `member_id`;
+  - split — largest-remainder, so shares sum exactly: every share floored to
+    paise, leftover paise to the largest fractional remainders; ties go to the
+    higher weight, then the lower `member_id`;
   - reserve and goal contributions — **up** to the whole rupee (ADR-011);
   - display — half-up to paise, via
     `Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })`,

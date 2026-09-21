@@ -208,6 +208,12 @@ has been restored once.
 
 ### Phase 1 — Schema and projection engine
 
+> **Built 2026-09-21, awaiting one check.** Engine, migration, seed and tests
+> are in; everything passes, including the golden forecast. The expected
+> figures in `libs/core/src/testing/synthetic-household.expected.json` were
+> hand-calculated by Claude from the fixture, independently of the engine code,
+> and still need the owner's own check — that is the last open item.
+
 - Kysely + `pg`; `setTypeParser` for `numeric` and `date`; SQL migrations for
   every table, constraints, indexes (partial unique on `occurrence`, see
   [ADR-007](adr/ADR-007-tombstones-for-sync.md)); `version` trigger;
@@ -229,7 +235,9 @@ regeneration leaving confirmed, settled, skipped and overridden rows untouched �
 a tombstoned occurrence not blocking regeneration of its date.
 
 *Done when:* the engine reproduces a hand-calculated 18-month forecast for the
-synthetic set — the hand calculation committed as a golden fixture.
+synthetic set — the hand calculation committed as a golden fixture
+(`synthetic-household.json` in, `synthetic-household.expected.json` out; the
+seed reads the same fixture, so seeded data and tested forecast cannot drift).
 
 ### Phase 2 — API
 

@@ -50,7 +50,14 @@ manual corrections from later rule edits. **Every write path must respect them,
 not just the engine** — this is the easiest thing in the repo to get wrong.
 Phones change occurrences only through server-applied commands (ADR-009).
 
-`UNIQUE (flow_id, due_date)` makes regeneration idempotent. ADR-007 turns it
+**Occurrences carry `rule_date` as well as `due_date`** (found while building
+Phase 1). `rule_date` is the date the rule produced and never changes;
+`due_date` moves only under a date override (a CHECK enforces
+`is_date_overridden OR due_date = rule_date`). Regeneration matches on
+`(flow_id, rule_date)`. Matching on `due_date` — the original design — would
+re-insert the rule date of every occurrence whose date had been overridden.
+
+`UNIQUE (flow_id, rule_date)` makes regeneration idempotent. ADR-007 turns it
 into a partial unique index; the two must be read together.
 
 The projection engine stays pure TypeScript with no I/O — `project()`,

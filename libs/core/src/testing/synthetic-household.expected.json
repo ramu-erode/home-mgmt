@@ -1,0 +1,38 @@
+{
+  "_comment": "Hand-calculated from synthetic-household.json, NOT produced by running the engine. Computed 2026-09-21 by Claude by listing every due date per flow; needs an independent check by the owner before Phase 1 is done. Months Sep 2026 – Feb 2028. Sep 2026 counts only items due on or after the 21st (the snapshot date).",
+  "status": "awaiting owner check",
+  "months": [
+    { "month": "2026-09", "outgoings": "1499.00",  "incomeAll": "0.00",      "balanceAll": "248501.00" },
+    { "month": "2026-10", "outgoings": "48999.00", "incomeAll": "25000.00",  "balanceAll": "224502.00" },
+    { "month": "2026-11", "outgoings": "80999.00", "incomeAll": "25000.00",  "balanceAll": "168503.00" },
+    { "month": "2026-12", "outgoings": "8999.00",  "incomeAll": "205000.00", "balanceAll": "364504.00" },
+    { "month": "2027-01", "outgoings": "38999.00", "incomeAll": "25000.00",  "balanceAll": "350505.00" },
+    { "month": "2027-02", "outgoings": "48999.00", "incomeAll": "25000.00",  "balanceAll": "326506.00" },
+    { "month": "2027-03", "outgoings": "33499.00", "incomeAll": "175000.00", "balanceAll": "468007.00" },
+    { "month": "2027-04", "outgoings": "8999.00",  "incomeAll": "25000.00",  "balanceAll": "484008.00" },
+    { "month": "2027-05", "outgoings": "68999.00", "incomeAll": "25000.00",  "balanceAll": "440009.00" },
+    { "month": "2027-06", "outgoings": "80999.00", "incomeAll": "25000.00",  "balanceAll": "384010.00" },
+    { "month": "2027-07", "outgoings": "14999.00", "incomeAll": "25000.00",  "balanceAll": "394011.00" },
+    { "month": "2027-08", "outgoings": "8999.00",  "incomeAll": "25000.00",  "balanceAll": "410012.00" },
+    { "month": "2027-09", "outgoings": "8999.00",  "incomeAll": "25000.00",  "balanceAll": "426013.00" },
+    { "month": "2027-10", "outgoings": "50999.00", "incomeAll": "25000.00",  "balanceAll": "400014.00" },
+    { "month": "2027-11", "outgoings": "80999.00", "incomeAll": "25000.00",  "balanceAll": "344015.00" },
+    { "month": "2027-12", "outgoings": "8999.00",  "incomeAll": "25000.00",  "balanceAll": "360016.00" },
+    { "month": "2028-01", "outgoings": "38999.00", "incomeAll": "25000.00",  "balanceAll": "346017.00" },
+    { "month": "2028-02", "outgoings": "50999.00", "incomeAll": "25000.00",  "balanceAll": "320018.00" }
+  ],
+  "steadyState": "37708.00",
+  "workings": {
+    "swimming": "3 × 2500 on the 5th; Sep 5 is before the snapshot → Oct 2026 onwards, 7500/month",
+    "schoolChild1": "{6,10,2} on the 5th: 2026-10 40000, 2027-02 40000, 2027-06 42000 (hike), 2027-10 42000, 2028-02 42000",
+    "schoolChild2": "{6,11,1} on the 10th: 2026-11, 2027-01, 2027-06, 2027-11, 2028-01 — 30000 each",
+    "carService": "every 4 months from 2026-11-20: 2026-11, 2027-03, 2027-07, 2027-11 — 6000 each",
+    "vehicleInsurance": "yearly 15 Mar: 2027-03 18500",
+    "healthInsurance": "yearly 1 Nov: 2026-11, 2027-11 — 36000 each",
+    "phone": "1499 on the 31st, clamped: Sep 30 2026 is after the 21st → every month Sep 2026 – Feb 2028",
+    "trip": "2027-05 60000",
+    "rent": "25000 on the 1st: Sep 1 is before the snapshot → Oct 2026 onwards",
+    "contracts": "2026-12 180000, 2027-03 150000",
+    "steadyState": "OUT for Oct 2026 – Sep 2027 = 452488 → ÷12 = 37707.33 → up to the rupee 37708"
+  }
+}
