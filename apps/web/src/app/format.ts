@@ -26,6 +26,25 @@ export function formatDate(date: CivilDate): string {
   return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`));
 }
 
+const compact = new Intl.NumberFormat('en-IN', { notation: 'compact', style: 'currency', currency: 'INR', maximumFractionDigits: 1 });
+
+/** "₹1.2L", "₹20K" — axis ticks only; every exact value is also in a table. */
+export function formatCompact(value: Money | number): string {
+  return compact.format(value as unknown as number);
+}
+
+/** A calendar month as "Nov 2026" (from 'YYYY-MM'). */
+export function formatMonth(month: string, style: 'short' | 'long' = 'short'): string {
+  return new Intl.DateTimeFormat('en-IN', { month: style, year: 'numeric', timeZone: 'UTC' }).format(new Date(`${month}-01T12:00:00Z`));
+}
+
+export const isNegative = (m: Money) => m.startsWith('-');
+
+/** "5 Oct" — for lists where the month or year is already on screen. */
+export function formatDay(date: CivilDate): string {
+  return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`));
+}
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export const monthName = (m: number) => MONTHS[m - 1];
 

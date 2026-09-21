@@ -1,0 +1,42 @@
+.charts { position: relative; outline: none; }
+.charts:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--radius); }
+.plot { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+
+.grid { stroke: var(--grid); stroke-width: 1; }
+.axis { stroke: var(--baseline); stroke-width: 1; }
+.tick { font-size: 9.5px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.cap, .end-label { font-size: 10px; fill: var(--text); font-variant-numeric: tabular-nums; }
+.column { fill: var(--series-1); transition: opacity 120ms; }
+.column.dim { opacity: 0.45; }
+.line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+/* The 2px surface ring keeps markers legible where they cross a line. */
+.end { stroke: var(--surface); stroke-width: 2; }
+.crosshair { stroke: var(--muted); stroke-width: 1; }
+
+.legend { list-style: none; margin: -0.2rem 0 0.4rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; font-size: 0.8rem; color: var(--muted); }
+.legend li { display: flex; align-items: center; gap: 0.35rem; }
+
+/* The readout sits above the charts and never covers them — on a phone a floating box would hide the data. */
+.readout {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 0.55rem 0.8rem; margin-bottom: 0.75rem; min-height: 5.6rem; display: grid; gap: 0.15rem; font-size: 0.85rem;
+}
+.readout .empty { color: var(--muted); align-self: center; }
+.tip-month { color: var(--muted); }
+.tip-row { display: grid; grid-template-columns: 14px auto 1fr; gap: 0.4rem; align-items: center; }
+.tip-row.out { grid-template-columns: 14px auto 1fr; }
+.tip-row strong { font-variant-numeric: tabular-nums; }
+.tip-row span { color: var(--muted); }
+
+.negative { color: var(--bad); }
+.tight { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; }
+.tight li { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; column-gap: 0.4rem; font-variant-numeric: tabular-nums; }
+.tight .icon { color: var(--critical); text-align: center; }
+.tight .short { color: var(--bad); }
+.problem { color: var(--bad); }
+
+.table-wrap { overflow-x: auto; margin-top: 0.5rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+th, td { padding: 0.35rem 0.5rem; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+th:first-child { text-align: left; }
+thead th { color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--line); }

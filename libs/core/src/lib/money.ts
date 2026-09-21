@@ -43,6 +43,19 @@ export function maxDec(a: Dec, b: Dec): Dec {
   return a.gt(b) ? a : b;
 }
 
+/** Exact Money arithmetic for callers outside the engine, which never see a Big (ADR-012). */
+export function addMoney(a: Money, b: Money): Money {
+  return toMoney(dec(a).plus(dec(b)));
+}
+
+export function subtractMoney(a: Money, b: Money): Money {
+  return toMoney(dec(a).minus(dec(b)));
+}
+
+export function sumMoney(values: Money[]): Money {
+  return toMoney(sum(values.map(dec)));
+}
+
 export interface Share {
   /** `null` is the household bucket (ADR-010). */
   memberId: Uuid | null;
