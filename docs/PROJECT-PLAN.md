@@ -208,11 +208,9 @@ has been restored once.
 
 ### Phase 1 — Schema and projection engine
 
-> **Built 2026-09-21, awaiting one check.** Engine, migration, seed and tests
-> are in; everything passes, including the golden forecast. The expected
-> figures in `libs/core/src/testing/synthetic-household.expected.json` were
-> hand-calculated by Claude from the fixture, independently of the engine code,
-> and still need the owner's own check — that is the last open item.
+> **Done 2026-09-21.** Engine, migration, seed and tests merged (PR #2). The
+> golden expectations were hand-calculated independently of the engine and
+> reviewed by the owner.
 
 - Kysely + `pg`; `setTypeParser` for `numeric` and `date`; SQL migrations for
   every table, constraints, indexes (partial unique on `occurrence`, see
@@ -241,15 +239,29 @@ seed reads the same fixture, so seeded data and tested forecast cannot drift).
 
 ### Phase 2 — API
 
+> **Built 2026-09-21 except the deploy.** Everything below except the last
+> bullet is in and tested against the devcontainer database: sync push and pull,
+> regeneration, forecast, health, the tailnet guard and static hosting. The
+> first deploy and the done-criterion both need the Mac, so they wait on
+> Phase 0 — the deploy script is deliberately not written until there is a Mac
+> to run it against, since an untested deploy script is worse than none.
+
 - Repository base in `apps/api/src/db/`: `deleted_at IS NULL`, advisory lock,
   `client_updated_at` / `updated_by_device`, tombstoning. Lint confines Kysely
   to it.
 - Auth: tailnet identity guard on `Tailscale-User-Login`; NestJS on
   `127.0.0.1` ([ADR-014](adr/ADR-014-tailnet-identity-no-app-login.md)).
-- CRUD for flows, amounts, allocations, members, categories, goals, snapshots;
-  occurrence commands.
-- Server-side regeneration inside the flow-edit transaction; nightly horizon
-  roll in household time.
+- **Writes go through the sync protocol only** — `POST /api/sync` upserts and
+  deletes for members, categories, flows, amounts, allocations, goals,
+  snapshots and devices, plus occurrence commands; `GET /api/sync` pulls deltas
+  ([ADR-009](adr/ADR-009-server-authoritative-sync-protocol.md)). *Changed in
+  build:* the plan listed per-table REST CRUD, but the UI is local-first from
+  Phase 3 and never calls it, and a second write path would have to enforce the
+  ADR-003 invariant twice.
+- `GET /api/forecast`: the engine's cashflow and sinking fund, computed on the
+  server.
+- Server-side regeneration inside the flow-edit transaction; horizon roll
+  whenever the household date changes (on boot, checked hourly).
 - `GET /api/health`: git SHA, migration version, database, last backup to the
   drive.
 - Serve the Angular build as static files from the same process.

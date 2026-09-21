@@ -26,7 +26,11 @@ its headers and the secure context the service worker needs.
 - **NestJS binds `127.0.0.1`** (`HOST` env, default `127.0.0.1`). The app URL is
   `https://mac-mini.<tailnet>.ts.net` — no port.
 - **No app login.** A guard rejects any request whose `Tailscale-User-Login`
-  is not the household account. No argon2id, tokens, login screen or refresh.
+  is not the household account (`TAILSCALE_ALLOWED_LOGIN`). No argon2id, tokens,
+  login screen or refresh. The guard **fails closed in production** when the
+  login is not configured; in development it allows everything with a warning.
+  `GET /api/health` is the one public route — the deploy script calls it on
+  loopback, and it exposes no household data.
 - **Device identity replaces `app_user`.** On first launch an install mints a
   `device_id` (UUID, stored in Dexie) and asks once "whose phone is this?",
   linking a `member`. Every outbox operation carries it; rows store

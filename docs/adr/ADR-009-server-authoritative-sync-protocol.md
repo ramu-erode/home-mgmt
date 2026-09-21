@@ -98,3 +98,27 @@ then clears its tables and pulls from zero. No local edit is lost.
   release that both adds a migration and drops a column.
 - All writes are serialised by one advisory lock. At two devices contention is
   nil; revisit only if this ever serves more than a household.
+
+**Settled while building Phase 2:**
+
+- **Sync is the only write API.** There are no per-table REST endpoints: the UI
+  is local-first (ADR-006) and never calls them, and a second write path would
+  have to enforce the ADR-003 invariant twice. Reads outside sync are
+  `GET /api/forecast` and `GET /api/health`.
+- **A push is one transaction; each operation runs under a savepoint.** A bad
+  operation is rolled back and rejected with a reason; the rest apply. Touched
+  flows are regenerated once, after all operations, so a flow and its first
+  amount can arrive in the same push in either order within it.
+- **An unknown `X-Device-Id` is registered, not refused** — named "New device"
+  with an epoch `client_updated_at`, so the phone's own device upsert always
+  wins.
+- **A `clientUpdatedAt` more than five minutes ahead of the server is clamped to
+  server time.** A phone with a fast clock would otherwise win every conflict.
+- **Rules the schema cannot express are enforced in the push:** a flow's
+  `direction` is immutable (its history would flip sign), and categories are two
+  levels deep.
+- **Deleting a flow tombstones its amounts and allocations**; regeneration then
+  tombstones its PLANNED, un-overridden occurrences and leaves the rest.
+- **The horizon roll runs whenever the household date changes** — on boot, then
+  checked hourly — rather than at a fixed time, so a Mac waiting for a FileVault
+  unlock (ADR-015) catches up the moment it is back.

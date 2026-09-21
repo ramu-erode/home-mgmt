@@ -71,10 +71,22 @@ psql                     # dev database (container service `db`)
 npm run db:migrate       # apply apps/api/src/db/migrations/*.sql (db:status to list)
 npm run db:seed          # load the SYNTHETIC household; idempotent
 npm run db:codegen       # regenerate src/db/schema.ts after a migration — commit it
-npm test                 # all projects; api includes schema integration tests
+npm test                 # all projects; api includes integration tests
 npm run start:api        # NestJS: API + static Angular bundle, :3000
 npm run start:web        # Angular dev server, :4200
 ```
+
+**API environment** (`apps/api/src/config.ts`): `DATABASE_URL` (required),
+`TAILSCALE_ALLOWED_LOGIN` (the household login; unset = allow all in dev,
+refuse all in production), `HOUSEHOLD_TZ` (default `Asia/Kolkata`), `HOST`
+(default `127.0.0.1` — never `0.0.0.0`), `PORT`, `WEB_DIST`, `GIT_SHA`,
+`BACKUP_STAMP_FILE`, `HORIZON_ROLL=off`, `FIXED_TODAY` (tests only).
+
+**Integration tests never touch the dev database.** Vitest's global setup
+migrates a template database once per run; each integration spec clones it
+(`createTestDatabase` in `apps/api/src/testing/`) and drops the clone after.
+`src/testing/` is the only place outside `src/db/` allowed to import `kysely`
+or `pg`, and it is excluded from the build.
 
 The migration and seed scripts are `.mts` run by Node 24's type stripping —
 no build step, and the same files run on the Mac during a deploy. That means
@@ -104,6 +116,8 @@ Production Postgres is native on the always-on Mac under a LaunchDaemon
 - **Regeneration never touches a row that is not `PLANNED` and un-overridden**
   (ADR-003). This applies to every write path, not just the engine. Phones
   change occurrences only through commands (ADR-009).
+- **Every project is `strict` TypeScript**, the API included — Kysely's insert
+  types only know a nullable column is optional under `strictNullChecks`.
 - **Migrations are expand, then contract** — never add and drop in one release
   (ADR-009, ADR-017).
 - **No real household data in git.** Seeds and fixtures are synthetic; real
