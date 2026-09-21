@@ -2,7 +2,16 @@
   "name": "@home-mgmt/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:api": "nx serve api",
+    "start:web": "nx serve web",
+    "test": "nx run-many -t test",
+    "lint": "nx run-many -t lint",
+    "db:migrate": "node apps/api/src/db/migrate.mts",
+    "db:status": "node apps/api/src/db/migrate.mts --status",
+    "db:seed": "node apps/api/src/db/seed.mts",
+    "db:codegen": "kysely-codegen --dialect postgres --camel-case --date-parser string --numeric-parser string --exclude-pattern \"kysely_*\" --out-file apps/api/src/db/schema.ts"
+  },
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~22.1.0",

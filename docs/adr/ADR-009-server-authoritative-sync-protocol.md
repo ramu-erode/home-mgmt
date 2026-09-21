@@ -42,9 +42,10 @@ synced, and never write occurrence rows to Dexie themselves.
 | `updated_at timestamptz` | trigger | audit only |
 | `updated_by_device uuid` | the originating device (ADR-014) | audit only |
 
-Every write transaction first takes `pg_advisory_xact_lock(<const>)`, so
-versions commit in the order they were assigned. The repository layer (ADR-016)
-does this; nothing else writes.
+Every write transaction takes `pg_advisory_xact_lock(<const>)` before drawing
+a version, so versions commit in the order they were assigned. The `version`
+trigger itself takes the lock, so no write path — repository, migration, or a
+hand-typed `psql` fix — can forget it.
 
 **Protocol**
 

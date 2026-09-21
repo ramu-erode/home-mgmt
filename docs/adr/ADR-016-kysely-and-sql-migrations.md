@@ -25,8 +25,13 @@ regeneration inside the flow-edit transaction.
 - **Hand-written SQL migrations** in `apps/api/src/db/migrations/` are the
   **schema of record**. Plan §5 links there; no separate table-design document.
 - **A repository base** in `apps/api/src/db/` is the only code that touches
-  Kysely. It adds `deleted_at IS NULL`, takes the advisory lock, stamps
-  `client_updated_at` / `updated_by_device`, and turns deletes into tombstones.
+  Kysely. It adds `deleted_at IS NULL`, stamps `client_updated_at` /
+  `updated_by_device`, and turns deletes into tombstones. What the database can
+  enforce, it does: the `version` trigger takes the advisory lock, and a
+  `BEFORE DELETE` trigger refuses hard deletes.
+- Migrations run with `node apps/api/src/db/migrate.mts` — Node 24's type
+  stripping, no build step — so the same file runs in the devcontainer and on
+  the Mac during a deploy.
 - `apps/api/eslint.config.mjs` restricts `kysely` and `pg` imports to
   `src/db/**`, the same move as the `libs/core` whitelist.
 

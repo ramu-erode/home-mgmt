@@ -1,0 +1,138 @@
+{
+  "_comment": "SYNTHETIC. Same shape as the real household, none of its data — real data never enters git. Read by the core golden test and by apps/api/src/db/seed.mts.",
+  "today": "2026-09-21",
+  "members": [
+    { "id": "00000000-0000-4000-8000-000000000001", "name": "Parent A", "displayOrder": 1 },
+    { "id": "00000000-0000-4000-8000-000000000002", "name": "Parent B", "displayOrder": 2 },
+    { "id": "00000000-0000-4000-8000-000000000003", "name": "Child 1", "displayOrder": 3 },
+    { "id": "00000000-0000-4000-8000-000000000004", "name": "Child 2", "displayOrder": 4 }
+  ],
+  "categories": [
+    { "id": "00000000-0000-4000-8000-000000000101", "name": "Education", "parentId": null },
+    { "id": "00000000-0000-4000-8000-000000000102", "name": "School fees", "parentId": "00000000-0000-4000-8000-000000000101" },
+    { "id": "00000000-0000-4000-8000-000000000103", "name": "Activities", "parentId": null },
+    { "id": "00000000-0000-4000-8000-000000000104", "name": "Swimming", "parentId": "00000000-0000-4000-8000-000000000103" },
+    { "id": "00000000-0000-4000-8000-000000000105", "name": "Insurance", "parentId": null },
+    { "id": "00000000-0000-4000-8000-000000000106", "name": "Vehicle", "parentId": null },
+    { "id": "00000000-0000-4000-8000-000000000107", "name": "Household", "parentId": null },
+    { "id": "00000000-0000-4000-8000-000000000108", "name": "Plans", "parentId": null },
+    { "id": "00000000-0000-4000-8000-000000000109", "name": "Income", "parentId": null },
+    { "id": "00000000-0000-4000-8000-000000000110", "name": "Rent", "parentId": "00000000-0000-4000-8000-000000000109" },
+    { "id": "00000000-0000-4000-8000-000000000111", "name": "Contracting", "parentId": "00000000-0000-4000-8000-000000000109" }
+  ],
+  "flows": [
+    {
+      "id": "00000000-0000-4000-8000-000000000201", "name": "Swimming — Child 1", "categoryId": "00000000-0000-4000-8000-000000000104",
+      "direction": "OUT", "recurrenceKind": "INTERVAL", "freq": "MONTHLY", "interval": 1, "months": null, "dayOfMonth": 5,
+      "startDate": "2026-01-05", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-01-01", "amount": "2500.00" }],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000003", "weight": 1 }]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000202", "name": "Swimming — Child 2", "categoryId": "00000000-0000-4000-8000-000000000104",
+      "direction": "OUT", "recurrenceKind": "INTERVAL", "freq": "MONTHLY", "interval": 1, "months": null, "dayOfMonth": 5,
+      "startDate": "2026-01-05", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-01-01", "amount": "2500.00" }],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000004", "weight": 1 }]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000203", "name": "Swimming — Parent A", "categoryId": "00000000-0000-4000-8000-000000000104",
+      "direction": "OUT", "recurrenceKind": "INTERVAL", "freq": "MONTHLY", "interval": 1, "months": null, "dayOfMonth": 5,
+      "startDate": "2026-01-05", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-01-01", "amount": "2500.00" }],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000001", "weight": 1 }]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000204", "name": "School — Child 1", "categoryId": "00000000-0000-4000-8000-000000000102",
+      "direction": "OUT", "recurrenceKind": "MONTHS", "freq": null, "interval": null, "months": [6, 10, 2], "dayOfMonth": 5,
+      "startDate": "2026-06-01", "endDate": null,
+      "amounts": [
+        { "effectiveFrom": "2026-06-01", "amount": "40000.00" },
+        { "effectiveFrom": "2027-06-01", "amount": "42000.00" }
+      ],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000003", "weight": 1 }]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000205", "name": "School — Child 2", "categoryId": "00000000-0000-4000-8000-000000000102",
+      "direction": "OUT", "recurrenceKind": "MONTHS", "freq": null, "interval": null, "months": [6, 11, 1], "dayOfMonth": 10,
+      "startDate": "2026-06-01", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-06-01", "amount": "30000.00" }],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000004", "weight": 1 }]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000206", "name": "Car service", "categoryId": "00000000-0000-4000-8000-000000000106",
+      "direction": "OUT", "recurrenceKind": "INTERVAL", "freq": "MONTHLY", "interval": 4, "months": null, "dayOfMonth": 20,
+      "startDate": "2026-11-20", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-11-01", "amount": "6000.00" }],
+      "allocations": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000207", "name": "Vehicle insurance", "categoryId": "00000000-0000-4000-8000-000000000105",
+      "direction": "OUT", "recurrenceKind": "INTERVAL", "freq": "YEARLY", "interval": 1, "months": null, "dayOfMonth": 15,
+      "startDate": "2026-03-15", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-03-01", "amount": "18500.00" }],
+      "allocations": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000208", "name": "Health insurance (family floater)", "categoryId": "00000000-0000-4000-8000-000000000105",
+      "direction": "OUT", "recurrenceKind": "INTERVAL", "freq": "YEARLY", "interval": 1, "months": null, "dayOfMonth": 1,
+      "startDate": "2025-11-01", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2025-11-01", "amount": "36000.00" }],
+      "allocations": [
+        { "memberId": "00000000-0000-4000-8000-000000000001", "weight": 1 },
+        { "memberId": "00000000-0000-4000-8000-000000000002", "weight": 1 },
+        { "memberId": "00000000-0000-4000-8000-000000000003", "weight": 1 },
+        { "memberId": "00000000-0000-4000-8000-000000000004", "weight": 1 }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000209", "name": "Phone plan", "categoryId": "00000000-0000-4000-8000-000000000107",
+      "direction": "OUT", "recurrenceKind": "INTERVAL", "freq": "MONTHLY", "interval": 1, "months": null, "dayOfMonth": 31,
+      "startDate": "2026-01-31", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-01-01", "amount": "1499.00" }],
+      "allocations": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000210", "name": "Family trip", "categoryId": "00000000-0000-4000-8000-000000000108",
+      "direction": "OUT", "recurrenceKind": "ONE_OFF", "freq": null, "interval": null, "months": null, "dayOfMonth": null,
+      "startDate": "2027-05-01", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2027-05-01", "amount": "60000.00" }],
+      "allocations": []
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000211", "name": "Rent", "categoryId": "00000000-0000-4000-8000-000000000110",
+      "direction": "IN", "recurrenceKind": "INTERVAL", "freq": "MONTHLY", "interval": 1, "months": null, "dayOfMonth": 1,
+      "startDate": "2025-01-01", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2025-01-01", "amount": "25000.00" }],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000002", "weight": 1 }]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000212", "name": "Contract — Client X", "categoryId": "00000000-0000-4000-8000-000000000111",
+      "direction": "IN", "recurrenceKind": "ONE_OFF", "freq": null, "interval": null, "months": null, "dayOfMonth": null,
+      "startDate": "2026-12-15", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2026-12-15", "amount": "180000.00" }],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000001", "weight": 1 }]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000213", "name": "Contract — Client Y", "categoryId": "00000000-0000-4000-8000-000000000111",
+      "direction": "IN", "recurrenceKind": "ONE_OFF", "freq": null, "interval": null, "months": null, "dayOfMonth": null,
+      "startDate": "2027-03-15", "endDate": null,
+      "amounts": [{ "effectiveFrom": "2027-03-15", "amount": "150000.00" }],
+      "allocations": [{ "memberId": "00000000-0000-4000-8000-000000000001", "weight": 1 }]
+    }
+  ],
+  "goals": [
+    {
+      "id": "00000000-0000-4000-8000-000000000301", "name": "Emergency fund", "memberId": null,
+      "targetAmount": "300000.00", "targetDate": "2027-12-31", "savedAmount": "50000.00", "priority": 1
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000302", "name": "Car", "memberId": null,
+      "targetAmount": "150000.00", "targetDate": "2027-09-01", "savedAmount": "0.00", "priority": 2
+    }
+  ],
+  "snapshot": {
+    "id": "00000000-0000-4000-8000-000000000401",
+    "asOf": "2026-09-21", "balance": "250000.00", "reservedAmount": "30000.00"
+  }
+}

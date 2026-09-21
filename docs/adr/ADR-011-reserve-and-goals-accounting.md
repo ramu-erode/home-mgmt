@@ -30,7 +30,12 @@ nothing preventing the same money counting as both reserve and goal saving.
 - `balance_snapshot.reserved_amount` records what is already earmarked; the
   engine draws it down against the nearest occurrences first.
 - Home screen shows **This month** (catch-up) and **Steady state**. The first
-  converges to the second.
+  converges to the second. Steady state = `OUT` outgoings over the next twelve
+  *full* months after the current one, ÷ 12, up to the rupee — starting
+  mid-month would drop what already fell due and count a monthly bill eleven
+  times.
+- A bill due in its own opening month (e.g. later this month, nothing saved) is
+  funded in that month.
 
 **Goals.**
 

@@ -24,7 +24,9 @@ The general form of this problem is in the source note.
 `flow_allocation`, `occurrence`, `goal`, `balance_snapshot`, `member`,
 `category`, `device` (ADR-010, ADR-014).
 
-1. Nothing syncable is hard-deleted; deletion sets `deleted_at = now()`.
+1. Nothing syncable is hard-deleted; deletion sets `deleted_at = now()`. A
+   `BEFORE DELETE` trigger refuses hard deletes unless the transaction has set
+   `homemgmt.purge = 'on'`, which only the purge job does.
 2. Regeneration **soft-deletes** stale `PLANNED`, un-overridden occurrences. The
    override protections in ADR-003 are unchanged.
 3. `GET /api/sync` returns tombstoned rows so clients can remove them locally.
@@ -37,11 +39,12 @@ The general form of this problem is in the source note.
 ## Consequences
 
 **The constraint change that will bite if missed.** ADR-003's
-`UNIQUE (flow_id, due_date)` now collides with tombstones — a soft-deleted
-occurrence blocks regenerating that same date. It must become partial:
+`UNIQUE (flow_id, rule_date)` now collides with tombstones — a soft-deleted
+occurrence blocks regenerating that same date. It must become partial (keyed on
+`rule_date`, not `due_date` — see ADR-003):
 
 ```sql
-CREATE UNIQUE INDEX uq_occurrence ON occurrence (flow_id, due_date)
+CREATE UNIQUE INDEX uq_occurrence ON occurrence (flow_id, rule_date)
   WHERE deleted_at IS NULL;
 
 CREATE INDEX ix_occurrence_due ON occurrence (due_date)
