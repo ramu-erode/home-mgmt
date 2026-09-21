@@ -1,6 +1,6 @@
 {
-  "_comment": "Hand-calculated from synthetic-household.json, NOT produced by running the engine. Computed 2026-09-21 by Claude by listing every due date per flow; needs an independent check by the owner before Phase 1 is done. Months Sep 2026 – Feb 2028. Sep 2026 counts only items due on or after the 21st (the snapshot date).",
-  "status": "awaiting owner check",
+  "_comment": "Hand-calculated from synthetic-household.json, NOT produced by running the engine. Computed 2026-09-21 by Claude by listing every due date per flow; reviewed and accepted by the owner on 2026-09-21. Months Sep 2026 – Feb 2028. Sep 2026 counts only items due on or after the 21st (the snapshot date).",
+  "status": "reviewed by owner 2026-09-21",
   "months": [
     { "month": "2026-09", "outgoings": "1499.00",  "incomeAll": "0.00",      "balanceAll": "248501.00" },
     { "month": "2026-10", "outgoings": "48999.00", "incomeAll": "25000.00",  "balanceAll": "224502.00" },

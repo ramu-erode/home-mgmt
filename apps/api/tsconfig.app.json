@@ -15,6 +15,7 @@
     "src/**/*.ts"
   ],
   "exclude": [
+    "src/testing/**",
     "vite.config.ts",
     "vite.config.mts",
     "vitest.config.ts",

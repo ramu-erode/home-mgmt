@@ -31,6 +31,17 @@ interface Household {
   snapshot: Record<string, unknown>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- see the note in main()
+type Untyped = any;
+
+/** A flow row without its child collections, which are separate tables. */
+function ruleOnly(flow: Household['flows'][number]): Record<string, unknown> {
+  const row: Record<string, unknown> = { ...flow };
+  delete row['amounts'];
+  delete row['allocations'];
+  return row;
+}
+
 async function main(): Promise<void> {
   const connectionString = process.env['DATABASE_URL'];
   if (!connectionString) throw new Error('DATABASE_URL is not set');
@@ -38,7 +49,7 @@ async function main(): Promise<void> {
 
   // Untyped on purpose: this script runs under plain Node type stripping and
   // cannot import the generated schema without a build step.
-  const db = new Kysely<any>({
+  const db = new Kysely<Untyped>({
     dialect: new PostgresDialect({ pool: new pg.Pool({ connectionString, max: 1 }) }),
     plugins: [new CamelCasePlugin()],
   });
@@ -48,7 +59,7 @@ async function main(): Promise<void> {
       // Parents before children, for the self-reference.
       await insert(tx, 'category', h.categories.filter((c) => c.parentId === null));
       await insert(tx, 'category', h.categories.filter((c) => c.parentId !== null));
-      await insert(tx, 'flow', h.flows.map(({ amounts: _a, allocations: _b, ...flow }) => flow));
+      await insert(tx, 'flow', h.flows.map(ruleOnly));
       for (const f of h.flows) {
         await insertKeyed(tx, 'flow_amount', ['flowId', 'effectiveFrom'], f.amounts.map((a) => ({ flowId: f.id, ...a })));
         await insertKeyed(tx, 'flow_allocation', ['flowId', 'memberId'], f.allocations.map((a) => ({ flowId: f.id, ...a })));
@@ -62,13 +73,13 @@ async function main(): Promise<void> {
   }
 }
 
-async function insert(tx: Kysely<any>, table: string, rows: object[]): Promise<void> {
+async function insert(tx: Kysely<Untyped>, table: string, rows: object[]): Promise<void> {
   if (rows.length === 0) return;
   await tx.insertInto(table).values(rows).onConflict((oc) => oc.column('id').doNothing()).execute();
 }
 
 /** For child rows without fixed ids: conflict on the partial natural-key index. */
-async function insertKeyed(tx: Kysely<any>, table: string, key: string[], rows: object[]): Promise<void> {
+async function insertKeyed(tx: Kysely<Untyped>, table: string, key: string[], rows: object[]): Promise<void> {
   if (rows.length === 0) return;
   await tx
     .insertInto(table)

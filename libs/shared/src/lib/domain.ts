@@ -90,6 +90,21 @@ export interface ForecastItem {
 }
 
 /**
+ * Everything a phone may do to an occurrence (ADR-009). Phones never insert or
+ * delete occurrences and never send whole rows; the server applies a command
+ * to the row as it is when the command arrives.
+ */
+export type OccurrenceCommand =
+  | { command: 'confirm' }
+  | { command: 'settle'; args: { on: CivilDate; amount: Money } }
+  | { command: 'skip' }
+  | { command: 'unskip' }
+  | { command: 'override'; args: { amount?: Money; dueDate?: CivilDate } }
+  | { command: 'note'; args: { text: string | null } };
+
+export type OccurrenceCommandName = OccurrenceCommand['command'];
+
+/**
  * The projection anchor. `balance = reservedAmount + Σ goal.savedAmount + free`
  * (ADR-011); the engine refuses a snapshot whose earmarks exceed the balance.
  */

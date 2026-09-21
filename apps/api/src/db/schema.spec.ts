@@ -1,24 +1,30 @@
 import { sql, type Transaction } from 'kysely';
+import { createTestDatabase, hasDatabase } from '../testing/test-app';
 import { createDatabase, type Database } from './database';
 import type { DB } from './schema';
 
 /**
- * Integration tests for the guarantees the schema itself enforces. They need
- * the devcontainer database with migrations applied (`npm run db:migrate`);
- * every test runs in a transaction that is rolled back.
+ * Integration tests for the guarantees the schema itself enforces, against a
+ * fresh clone of the migrated test template. Every test also runs in a
+ * transaction that is rolled back.
  */
-const url = process.env['DATABASE_URL'];
-const suite = url ? describe : describe.skip;
+const suite = hasDatabase ? describe : describe.skip;
 
 class Rollback extends Error {}
 
 suite('schema (integration)', () => {
   let db: Database;
+  let drop: () => Promise<void>;
 
-  beforeAll(() => {
-    db = createDatabase(url as string, 2);
+  beforeAll(async () => {
+    const test = await createTestDatabase();
+    drop = test.drop;
+    db = createDatabase(test.url, 2);
   });
-  afterAll(() => db.destroy());
+  afterAll(async () => {
+    await db.destroy();
+    await drop();
+  });
 
   /** Runs `fn` in a transaction and always rolls it back. */
   async function inRollback(fn: (tx: Transaction<DB>) => Promise<void>): Promise<void> {
