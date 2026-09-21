@@ -119,6 +119,22 @@ then clears its tables and pulls from zero. No local edit is lost.
   levels deep.
 - **Deleting a flow tombstones its amounts and allocations**; regeneration then
   tombstones its PLANNED, un-overridden occurrences and leaves the rest.
+**The client half, settled while building Phase 3:**
+
+- **Push, then pull.** A pull never overwrites a row that still has a pending
+  outbox entry; the next round delivers it once the push has landed.
+- **Any rejection triggers a full re-pull.** The phone applied the rejected
+  change optimistically, and the server's copy of that row may be older than
+  the cursor, so a delta would never bring it back. At household scale a full
+  pull is cheap; rows with pending entries are still kept.
+- **`resetRequired` clears the data tables, never the outbox**, then pulls
+  from zero.
+- **A 426 stops syncing until reload**; the outbox waits for the new bundle.
+- **Occurrence commands are applied locally with the same `applyCommand` the
+  server runs**, so a refusal is shown before anything is queued.
+- **The outbox payload is exactly `SYNC_COLUMNS`** (libs/shared) — the list the
+  server validates against; a test keeps the two identical.
+
 - **The horizon roll runs whenever the household date changes** — on boot, then
   checked hourly — rather than at a fixed time, so a Mac waiting for a FileVault
   unlock (ADR-015) catches up the moment it is back.

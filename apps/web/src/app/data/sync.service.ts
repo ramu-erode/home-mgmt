@@ -1,0 +1,175 @@
+import { computed, inject, Injectable, InjectionToken, signal } from '@angular/core';
+import type { PullTable, PushResponse, SyncRow } from '@home-mgmt/shared';
+import { ApiClient } from './api-client';
+import { DATA_TABLES, LocalDb, type OutboxEntry } from './local-db';
+import { liveSignal } from './live-signal';
+
+export const LOCAL_DB = new InjectionToken<LocalDb>('LOCAL_DB', { providedIn: 'root', factory: () => new LocalDb() });
+
+export type SyncStatus = 'idle' | 'syncing' | 'offline' | 'update-required' | 'error';
+
+const PERIODIC_MS = 60_000;
+const KICK_DEBOUNCE_MS = 300;
+
+/**
+ * Push the outbox, then pull deltas (ADR-009).
+ *
+ * - Push first, so a pull never brings back the server's old copy of a row the
+ *   phone has just changed. Rows that still have a pending entry after the push
+ *   are skipped by the pull; the next round delivers them.
+ * - Any rejection resets the cursor and re-pulls everything: the phone applied
+ *   the rejected change optimistically, and the server's copy of that row may
+ *   be older than the cursor. At household scale a full pull is cheap.
+ * - `resetRequired` (cursor older than the tombstone purge) clears the data
+ *   tables — never the outbox — and pulls from zero.
+ * - A 426 stops syncing until the app reloads onto the new bundle; the outbox is
+ *   kept for the new code to push.
+ */
+@Injectable({ providedIn: 'root' })
+export class SyncService {
+  private readonly db = inject(LOCAL_DB);
+  private readonly api = inject(ApiClient);
+
+  private readonly _status = signal<SyncStatus>('idle');
+  private readonly _error = signal<string | null>(null);
+  readonly status = this._status.asReadonly();
+  readonly error = this._error.asReadonly();
+
+  readonly pending = liveSignal(() => this.db.outbox.count(), 0);
+  readonly rejections = liveSignal(() => this.db.rejection.toArray(), []);
+  readonly lastSyncedAt = liveSignal(async () => (await this.db.meta.get('lastSyncedAt'))?.value ?? null, null as string | null);
+  /** False until the first sync attempt finishes, successfully or not. */
+  readonly settled = signal(false);
+  readonly busy = computed(() => this._status() === 'syncing');
+
+  private running: Promise<void> | null = null;
+  private again = false;
+  private kickTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Starts background syncing: now, when the network returns, and every minute. */
+  start(): void {
+    void this.run();
+    globalThis.addEventListener?.('online', () => void this.run());
+    setInterval(() => void this.run(), PERIODIC_MS);
+  }
+
+  /** Called after every local write; coalesces bursts of edits into one round. */
+  kick(): void {
+    if (this.kickTimer) clearTimeout(this.kickTimer);
+    this.kickTimer = setTimeout(() => void this.run(), KICK_DEBOUNCE_MS);
+  }
+
+  /** One sync round; concurrent calls fold into a single follow-up round. */
+  run(): Promise<void> {
+    if (this.running) {
+      this.again = true;
+      return this.running;
+    }
+    this.running = this.loop().finally(() => {
+      this.running = null;
+      this.settled.set(true);
+    });
+    return this.running;
+  }
+
+  async deviceId(): Promise<string> {
+    const existing = await this.db.meta.get('deviceId');
+    if (existing) return existing.value;
+    const id = crypto.randomUUID();
+    await this.db.meta.put({ key: 'deviceId', value: id });
+    return id;
+  }
+
+  private async loop(): Promise<void> {
+    do {
+      this.again = false;
+      if (this._status() === 'update-required') return;
+      this._status.set('syncing');
+      const next = await this.round();
+      this._status.set(next);
+    } while (this.again);
+  }
+
+  private async round(): Promise<SyncStatus> {
+    const deviceId = await this.deviceId();
+    const pushed = await this.pushOutbox(deviceId);
+    if (pushed !== 'ok' && pushed !== 'rejections') return pushed;
+    return this.pullChanges(deviceId, pushed === 'rejections');
+  }
+
+  private async pushOutbox(deviceId: string): Promise<'ok' | 'rejections' | SyncStatus> {
+    const entries = await this.db.outbox.orderBy('seq').toArray();
+    if (entries.length === 0) return 'ok';
+    const result = await this.api.push(entries.map((e) => e.operation), deviceId);
+    if (result.kind !== 'ok') return this.failed(result);
+    await this.settleOutbox(entries, result.body);
+    return result.body.rejected.length > 0 ? 'rejections' : 'ok';
+  }
+
+  /** Removes every entry the server answered for; records rejections for the UI. */
+  private async settleOutbox(entries: OutboxEntry[], response: PushResponse): Promise<void> {
+    const answered = new Set([...response.applied, ...response.rejected.map((r) => r.id)]);
+    const at = new Date().toISOString();
+    await this.db.transaction('rw', this.db.outbox, this.db.rejection, async () => {
+      await this.db.outbox.bulkDelete(entries.filter((e) => answered.has(e.operation.id)).map((e) => e.seq as number));
+      for (const r of response.rejected) {
+        const entry = entries.find((e) => e.operation.id === r.id);
+        await this.db.rejection.put({ id: r.id, table: entry?.operation.table ?? '?', rowId: entry?.rowId ?? '', reason: r.reason, message: r.message, at });
+      }
+    });
+  }
+
+  private async pullChanges(deviceId: string, fromScratch: boolean): Promise<SyncStatus> {
+    const since = fromScratch ? '0' : ((await this.db.meta.get('cursor'))?.value ?? '0');
+    const result = await this.api.pull(since, deviceId);
+    if (result.kind !== 'ok') return this.failed(result);
+    if (result.body.resetRequired) {
+      await this.clearData();
+      return this.pullChanges(deviceId, true);
+    }
+    await this.applyPull(result.body.changes, result.body.cursor, fromScratch);
+    this._error.set(null);
+    return 'idle';
+  }
+
+  private async applyPull(changes: Partial<Record<PullTable, SyncRow[]>>, cursor: string, replace: boolean): Promise<void> {
+    const tables = DATA_TABLES.map((t) => this.db.rows(t));
+    await this.db.transaction('rw', [...tables, this.db.outbox, this.db.meta], async () => {
+      const pendingRows = new Set((await this.db.outbox.toArray()).map((e) => e.rowId));
+      if (replace) await this.clearUnpending(pendingRows);
+      for (const table of DATA_TABLES) {
+        const rows = (changes[table] ?? []).filter((r) => !pendingRows.has(r.id));
+        if (rows.length) await this.db.rows(table).bulkPut(rows as never[]);
+      }
+      await this.db.meta.bulkPut([
+        { key: 'cursor', value: cursor },
+        { key: 'lastSyncedAt', value: new Date().toISOString() },
+      ]);
+    });
+  }
+
+  /** A full re-pull replaces every row the phone is not still waiting to push. */
+  private async clearUnpending(pendingRows: Set<string>): Promise<void> {
+    for (const table of DATA_TABLES) {
+      const rows = this.db.rows(table);
+      const keys = (await rows.toCollection().primaryKeys()).filter((k) => !pendingRows.has(k));
+      await rows.bulkDelete(keys);
+    }
+  }
+
+  private async clearData(): Promise<void> {
+    await this.db.transaction('rw', [...DATA_TABLES.map((t) => this.db.rows(t)), this.db.meta], async () => {
+      for (const t of DATA_TABLES) await this.db.rows(t).clear();
+      await this.db.meta.delete('cursor');
+    });
+  }
+
+  private failed(result: { kind: 'offline' | 'update-required' } | { kind: 'error'; status: number; message: string }): SyncStatus {
+    if (result.kind === 'error') this._error.set(`Server error ${result.status}: ${result.message}`);
+    return result.kind;
+  }
+
+  async dismissRejection(id: string): Promise<void> {
+    await this.db.rejection.delete(id);
+  }
+}

@@ -17,6 +17,22 @@ export const DEVICE_HEADER = 'x-device-id';
 export const SYNC_TABLES = ['member', 'device', 'category', 'flow', 'flowAmount', 'flowAllocation', 'balanceSnapshot', 'goal'] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];
 
+/**
+ * The columns an upsert payload carries, per table — the whole row minus `id`
+ * and sync metadata. The server validates exactly these; the client strips
+ * everything else before queueing.
+ */
+export const SYNC_COLUMNS: { readonly [T in SyncTable]: readonly string[] } = {
+  member: ['name', 'displayOrder'],
+  device: ['name', 'memberId'],
+  category: ['name', 'parentId'],
+  flow: ['name', 'categoryId', 'direction', 'recurrenceKind', 'freq', 'interval', 'months', 'dayOfMonth', 'startDate', 'endDate'],
+  flowAmount: ['flowId', 'effectiveFrom', 'amount'],
+  flowAllocation: ['flowId', 'memberId', 'weight'],
+  balanceSnapshot: ['asOf', 'balance', 'reservedAmount'],
+  goal: ['name', 'memberId', 'targetAmount', 'targetDate', 'savedAmount', 'priority'],
+};
+
 /** Everything a pull can return — occurrences come down but only commands go up. */
 export type PullTable = SyncTable | 'occurrence';
 
