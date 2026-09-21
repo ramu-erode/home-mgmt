@@ -132,6 +132,10 @@ then clears its tables and pulls from zero. No local edit is lost.
 - **A 426 stops syncing until reload**; the outbox waits for the new bundle.
 - **Occurrence commands are applied locally with the same `applyCommand` the
   server runs**, so a refusal is shown before anything is queued.
+- **The phone's forecast previews rather than trusts** (Phase 4): for a flow
+  with unsynced rule or amount changes, or one tombstoned by any path, it runs
+  `project` + `reconcile` in memory over the rows it has — exactly what the Mac
+  will do — instead of showing the Mac's stale occurrences.
 - **The outbox payload is exactly `SYNC_COLUMNS`** (libs/shared) — the list the
   server validates against; a test keeps the two identical.
 

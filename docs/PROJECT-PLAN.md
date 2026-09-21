@@ -293,6 +293,16 @@ browser.
 
 ### Phase 4 — Forecast views
 
+> **Built 2026-09-21.** Home (the one number), month view with calendar and
+> per-member split, cashflow, reserve, goals. The engine runs on the phone over
+> the local read model; flows with unsynced changes are previewed with the same
+> `project` + `reconcile` the Mac runs. *Added in build:* confirm / paid / skip /
+> change / note on each occurrence in the month view — the commands existed
+> from Phase 2 with no screen to issue them. The done-criterion is met on the
+> synthetic household: November and June stand out at ₹80,999, and the home
+> screen leads with what to set aside this month. Judging it on a phone waits
+> for the Mac.
+
 The payoff screens:
 
 - **Month view** — what's due, running total, per-member breakdown plus a

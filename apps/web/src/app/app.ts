@@ -17,9 +17,11 @@ import { SyncBadge } from './shell/sync-badge';
     @if (household.deviceReady()) {
       <main><router-outlet /></main>
       <nav class="tabs" aria-label="Sections">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        <a routerLink="/month" routerLinkActive="active">Month</a>
+        <a routerLink="/cashflow" routerLinkActive="active">Cashflow</a>
         <a routerLink="/flows" routerLinkActive="active">Flows</a>
-        <a routerLink="/members" routerLinkActive="active">Members</a>
-        <a routerLink="/categories" routerLinkActive="active">Categories</a>
+        <a routerLink="/more" routerLinkActive="active">More</a>
       </nav>
     } @else if (sync.settled()) {
       <main><app-device-setup /></main>

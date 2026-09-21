@@ -107,6 +107,13 @@ real Dexie.
 
 ## Conventions
 
+- **Charts are hand-built SVG, no chart library.** Series colours are the
+  `--series-*` tokens in `apps/web/src/styles.css`, validated with the dataviz
+  skill's `validate_palette.js` against the app's own light and dark surfaces —
+  re-run it before changing one. One y-axis per chart; every chart has a table
+  view.
+- **Money arithmetic in the web app goes through `addMoney` / `sumMoney` from
+  libs/core** — never `Number()` on Money except for pixel geometry.
 - **Dexie live queries only read.** A write inside `liveQuery` throws, and an
   errored subscription never recovers — the signal silently freezes. Mint ids
   and defaults outside the query.

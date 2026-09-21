@@ -1,0 +1,123 @@
+<div class="page-head"><h1>Cashflow</h1></div>
+
+@if (forecast.result().error; as error) {
+  <p class="card problem">{{ error }} — fix the balance or goals so the earmarks fit.</p>
+} @else {
+  @if (!forecast.hasSnapshot()) {
+    <p class="hint">No balance entered yet — balances start from ₹0.</p>
+  }
+
+  <!-- One tabbable region for both charts: arrow keys move the crosshair. -->
+  <div class="charts" tabindex="0" role="group" aria-label="18-month cashflow. Use the arrow keys to read each month."
+    (keydown)="key($event)" (focus)="hover.set(hover() ?? 0)" (blur)="hover.set(null)">
+
+    <div class="readout" role="status" aria-live="polite">
+      @if (hovered(); as m) {
+        <div class="tip-month">{{ formatMonth(m.month, 'long') }}</div>
+        <div class="tip-row out"><svg width="14" height="8" aria-hidden="true"><rect x="3" y="0" width="8" height="8" rx="2" fill="var(--series-1)" /></svg><strong>{{ formatMoney(m.outgoings) }}</strong><span>out</span></div>
+        @for (s of series; track s.key) {
+          <div class="tip-row">
+            <svg width="14" height="8" aria-hidden="true"><line x1="0" y1="4" x2="14" y2="4" [attr.stroke]="s.color" stroke-width="2" stroke-linecap="round" /></svg>
+            <strong [class.negative]="isNegative(m[s.key])">{{ formatMoney(m[s.key]) }}</strong><span>{{ s.label }}</span>
+          </div>
+        }
+      } @else {
+        <span class="empty">Touch a month to read it.</span>
+      }
+    </div>
+
+    <section class="card chart">
+      <h2>Money out each month</h2>
+      <svg class="plot" [attr.viewBox]="'0 0 ' + W + ' ' + outH" role="img" aria-label="Outgoings per month; exact values in the table below."
+        (pointermove)="pointer($event)" (pointerleave)="hover.set(null)">
+        @for (t of outTicks(); track t) {
+          <line class="grid" [attr.x1]="LEFT" [attr.x2]="LEFT + PLOT" [attr.y1]="outTickY(t)" [attr.y2]="outTickY(t)" />
+          <text class="tick" [attr.x]="LEFT - 6" [attr.y]="outTickY(t) + 3.5" text-anchor="end">{{ formatCompact(t) }}</text>
+        }
+        <line class="axis" [attr.x1]="LEFT" [attr.x2]="LEFT + PLOT" [attr.y1]="outBaseY" [attr.y2]="outBaseY" />
+        @for (c of columns(); track c.i) {
+          <path class="column" [attr.d]="c.d" [class.dim]="hover() !== null && hover() !== c.i" />
+          @if (c.isMax) {
+            <text class="cap" [attr.x]="cx(c.i)" [attr.y]="c.top - 5" text-anchor="middle">{{ formatCompact(c.value) }}</text>
+          }
+        }
+        @for (l of xLabels(); track l.i) {
+          <text class="tick" [attr.x]="cx(l.i)" [attr.y]="outBaseY + 16" text-anchor="middle">{{ l.text }}</text>
+        }
+        @if (hover() !== null) {
+          <line class="crosshair" [attr.x1]="cx(hover()!)" [attr.x2]="cx(hover()!)" y1="10" [attr.y2]="outBaseY" />
+        }
+      </svg>
+    </section>
+
+    <section class="card chart">
+      <h2>Balance</h2>
+      <ul class="legend">
+        @for (s of series; track s.key) {
+          <li><svg width="16" height="8" aria-hidden="true"><line x1="1" y1="4" x2="15" y2="4" [attr.stroke]="s.color" stroke-width="2" stroke-linecap="round" /></svg>{{ s.label }}</li>
+        }
+      </ul>
+      <svg class="plot" [attr.viewBox]="'0 0 ' + W + ' ' + balH" role="img" aria-label="Balance by month under three readings; exact values in the table below."
+        (pointermove)="pointer($event)" (pointerleave)="hover.set(null)">
+        @for (t of balTicks(); track t) {
+          <line [class]="t === 0 ? 'axis' : 'grid'" [attr.x1]="LEFT" [attr.x2]="LEFT + PLOT" [attr.y1]="balTickY(t)" [attr.y2]="balTickY(t)" />
+          <text class="tick" [attr.x]="LEFT - 6" [attr.y]="balTickY(t) + 3.5" text-anchor="end">{{ formatCompact(t) }}</text>
+        }
+        @for (l of lines(); track l.key) {
+          <path class="line" [attr.d]="l.d" [attr.stroke]="l.color" />
+          @if (l.end) {
+            <circle class="end" [attr.cx]="l.end[0]" [attr.cy]="l.end[1]" r="4" [attr.fill]="l.color" />
+            @if (endLabels() && l.endValue) {
+              <text class="end-label" [attr.x]="l.end[0] + 8" [attr.y]="l.end[1] + 3.5">{{ formatCompact(l.endValue) }}</text>
+            }
+          }
+        }
+        @if (hover() !== null) {
+          <line class="crosshair" [attr.x1]="cx(hover()!)" [attr.x2]="cx(hover()!)" [attr.y1]="12" [attr.y2]="balH - 24" />
+          @for (l of lines(); track l.key) {
+            <circle class="end" [attr.cx]="cx(hover()!)" [attr.cy]="balTickY(+months()[hover()!][l.key])" r="4" [attr.fill]="l.color" />
+          }
+        }
+        @for (l of xLabels(); track l.i) {
+          <text class="tick" [attr.x]="cx(l.i)" [attr.y]="balH - 8" text-anchor="middle">{{ l.text }}</text>
+        }
+      </svg>
+    </section>
+  </div>
+
+  @if (forecast.tightMonths().length) {
+    <section class="card">
+      <h2>Tight months</h2>
+      <ul class="tight">
+        @for (m of forecast.tightMonths(); track m.month) {
+          <li><span class="icon" aria-hidden="true">⚠</span><span>{{ formatMonth(m.month, 'long') }}</span><span class="short">short {{ formatMoney($any(m.free.slice(1))) }}</span></li>
+        }
+      </ul>
+      <p class="hint">Short means this month's bills, reserve and goals take more than is free.</p>
+    </section>
+  }
+
+  <button type="button" class="link" (click)="showTable.set(!showTable())" [attr.aria-expanded]="showTable()">{{ showTable() ? 'Hide' : 'Show' }} the numbers</button>
+  @if (showTable()) {
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Month</th><th scope="col">Out</th><th scope="col">In</th><th scope="col">Balance</th><th scope="col">Confirmed only</th><th scope="col">Free</th></tr>
+        </thead>
+        <tbody>
+          @for (m of months(); track m.month) {
+            <tr>
+              <th scope="row">{{ formatMonth(m.month) }}</th>
+              <td>{{ formatMoney(m.outgoings) }}</td>
+              <td>{{ formatMoney(m.incomeAll) }}</td>
+              <td>{{ formatMoney(m.balanceAll) }}</td>
+              <td>{{ formatMoney(m.balanceConfirmed) }}</td>
+              <td [class.negative]="isNegative(m.free)">{{ formatMoney(m.free) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  <p class="hint">Free = balance minus what is set aside for bills and goals. <a routerLink="/reserve">How the reserve is worked out</a></p>
+}

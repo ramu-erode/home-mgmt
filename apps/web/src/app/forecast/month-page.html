@@ -1,0 +1,85 @@
+<div class="page-head month-nav">
+  <a class="button icon" [routerLink]="['/month', prev()]" aria-label="Previous month">‹</a>
+  <h1>{{ formatMonth(month(), 'long') }}</h1>
+  <a class="button icon" [routerLink]="['/month', next()]" aria-label="Next month">›</a>
+</div>
+
+<div class="tiles">
+  <div class="tile"><span class="label">Out</span><span class="value">{{ formatMoney(totals().out) }}</span></div>
+  <div class="tile"><span class="label">In</span><span class="value">{{ formatMoney(totals().in) }}</span></div>
+  <div class="tile"><span class="label">Net</span><span class="value">{{ formatMoney(totals().net) }}</span></div>
+</div>
+
+<div class="segmented" role="radiogroup" aria-label="View">
+  <button type="button" [class.on]="view() === 'list'" (click)="view.set('list')">List</button>
+  <button type="button" [class.on]="view() === 'calendar'" (click)="view.set('calendar')">Calendar</button>
+</div>
+
+@if (hasPreview()) {
+  <p class="hint">Includes changes not yet synced with the Mac.</p>
+}
+
+@if (view() === 'calendar') {
+  <section class="card">
+    <div class="calendar" role="grid" [attr.aria-label]="formatMonth(month(), 'long')">
+      @for (w of ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; track w) {
+        <div class="weekday" role="columnheader">{{ w }}</div>
+      }
+      @for (c of calendar(); track $index) {
+        @if (c) {
+          <button type="button" class="day" role="gridcell" [class.has]="c.count > 0" [class.picked]="day() === c.date" (click)="pickDay(c.date)"
+            [attr.aria-label]="c.day + (c.count ? ', ' + c.count + ' due' + (c.out ? ', ' + formatMoney(c.out) + ' out' : '') : '')">
+            <span class="n">{{ c.day }}</span>
+            @if (c.out) { <span class="amt">{{ formatCompact(c.out) }}</span> }
+            @else if (c.count) { <span class="dot" aria-hidden="true"></span> }
+          </button>
+        } @else {
+          <div class="blank"></div>
+        }
+      }
+    </div>
+  </section>
+} @else {
+  @if (day()) {
+    <p class="filter">Showing {{ formatDate($any(day())) }} · <button type="button" class="link" (click)="day.set(null)">whole month</button></p>
+  }
+  <section class="card list">
+    @for (l of lines(); track l.item.id) {
+      <div class="occ" [class.skipped]="l.item.status === 'SKIPPED'">
+        <button type="button" class="row-button" (click)="toggle(l.item.id)" [attr.aria-expanded]="open() === l.item.id">
+          <span class="date">{{ formatDay(l.item.dueDate) }}</span>
+          <span class="name">
+            {{ l.name }}
+            @if (l.item.isAmountOverridden || l.item.isDateOverridden) { <span class="tag">changed</span> }
+            @if (l.item.preview) { <span class="tag">unsynced</span> }
+          </span>
+          <span class="amount" [class.in]="l.item.direction === 'IN'">{{ l.item.direction === 'IN' ? '+' : '' }}{{ formatMoney(l.item.amount) }}</span>
+          <span class="status" [attr.data-status]="l.item.status">{{ statusLabel[l.item.status] }}</span>
+          @if (l.item.direction === 'OUT' && l.item.status !== 'SKIPPED') { <span class="running">running {{ formatMoney(l.running) }}</span> }
+        </button>
+        @if (open() === l.item.id) {
+          <div class="actions-panel">
+            @if (l.item.note) { <p class="note">“{{ l.item.note }}”</p> }
+            <app-occurrence-actions [occurrence]="l.item" />
+          </div>
+        }
+      </div>
+    } @empty {
+      <p class="muted">Nothing due{{ day() ? ' that day' : ' this month' }}.</p>
+    }
+  </section>
+}
+
+@if (byMember().length) {
+  <section class="card">
+    <h2>Outgoings by person</h2>
+    <table class="split">
+      <tbody>
+        @for (r of byMember(); track r.name) {
+          <tr><th scope="row">{{ r.name }}</th><td>{{ formatMoney(r.amount) }}</td></tr>
+        }
+      </tbody>
+      <tfoot><tr><th scope="row">Total</th><td>{{ formatMoney(totals().out) }}</td></tr></tfoot>
+    </table>
+  </section>
+}
