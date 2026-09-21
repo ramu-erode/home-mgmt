@@ -1,0 +1,42 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+
+# Compose reads .env from .devcontainer/ — it carries a host-specific
+# CLAUDE_KB path and a dev password. .env.example is the tracked one.
+.env
+.devcontainer/.env
+
+# Claude: ship reviewable artifacts, keep session state out.
+.claude/*
+!.claude/settings.json
+!.claude/commands/
+!.claude/agents/
+!.claude/skills/
+
+.angular
+
+vitest.config.*.timestamp*
+__screenshots__/
+
+# ---- Nx (merged from the generated .gitignore.nx) ----
+tmp
+out-tsc
+.nx/cache
+.nx/workspace-data
+.nx/migrate-runs
+
+# Editors. VS Code's shared settings are reviewable artifacts and stay tracked;
+# everything else in .vscode is per-machine.
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+/.idea
+*.sublime-workspace
+
+# Leftover from the create-nx-workspace move; delete it.
+.gitignore.nx

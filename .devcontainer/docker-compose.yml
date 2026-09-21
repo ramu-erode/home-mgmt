@@ -1,0 +1,50 @@
+# Compose reads .env from THIS directory (.devcontainer/), not the repo root.
+# The ${VAR:?...} form aborts `up` with a readable message when .env is missing.
+# CLAUDE_KB must be an ABSOLUTE path — compose does not expand ~.
+# Get either wrong and ${CLAUDE_KB} expands to empty: the mount silently
+# resolves to a relative path and the container comes up with an empty Claude
+# home. No error, just no memory.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      # workspace — target must match devcontainer.json "workspaceFolder"
+      - ..:/home-mgmt:cached
+      # shared Claude home and knowledge vault (two distinct bind mounts)
+      - ${CLAUDE_KB:?set CLAUDE_KB in .devcontainer/.env - copy it from .env.example, absolute path}/claude-home:/home/node/.claude:cached
+      - ${CLAUDE_KB:?set CLAUDE_KB in .devcontainer/.env}/knowledge:/knowledge:cached
+    working_dir: /home-mgmt
+    command: sleep infinity
+    environment:
+      DATABASE_URL: postgres://homemgmt:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .devcontainer/.env}@db:5432/homemgmt
+      PGHOST: db
+      PGUSER: homemgmt
+      PGDATABASE: homemgmt
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Development database only. Production Postgres runs natively on the
+  # always-on Mac under a LaunchDaemon — see ADR-002 and ADR-008.
+  db:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: homemgmt
+      POSTGRES_USER: homemgmt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .devcontainer/.env - the postgres image refuses to initialise without one}
+    volumes:
+      - homemgmt-pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homemgmt -d homemgmt"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  homemgmt-pgdata:

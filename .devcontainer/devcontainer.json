@@ -1,0 +1,50 @@
+{
+  "name": "home-mgmt",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+
+  // Claude Code CLI (the binary is `claude`). Anthropic's own feature, so it
+  // tracks releases independently of the image.
+  //
+  // Deliberately WITHOUT the node feature its README suggests: this image
+  // already carries the Node pinned in the Dockerfile, and adding
+  // devcontainers/features/node would install a second Node beside it. The
+  // claude-code feature only auto-installs Node (18.x) when none is found, and
+  // nvm's is on the system PATH here, so it finds ours and skips that.
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+
+  // MUST be /home-mgmt, not the default /workspace.
+  // The Claude auto-memory key is the full container path with slashes turned
+  // to dashes, so /workspace would interleave this repo's memory with every
+  // other container using the default. See
+  // /knowledge/deployment/shared-claude-home-mounts.md
+  "workspaceFolder": "/home-mgmt",
+  "remoteUser": "node",
+
+  "forwardPorts": [3000, 4200, "db:5432"],
+  "portsAttributes": {
+    "3000": { "label": "API + Angular bundle" },
+    "4200": { "label": "Angular dev server" },
+    "db:5432": { "label": "Postgres (dev)" }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "angular.ng-template",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ckolkman.vscode-postgres"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "files.eol": "\n"
+      }
+    }
+  }
+}
