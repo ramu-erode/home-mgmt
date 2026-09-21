@@ -1,6 +1,6 @@
 # ADR-004: Tailscale for device access
 
-- **Status:** Accepted
+- **Status:** Accepted — amended 2026-09-21 by ADR-014 (localhost bind, key expiry, identity) and ADR-015 (`tailscaled`)
 - **Date:** 2026-09-21
 - **Source note:** `/knowledge/guidelines/tailscale-for-self-hosted-services.md`
 
@@ -20,15 +20,21 @@ only from inside the tailnet; no router port is opened.
 - **MagicDNS** for hostnames rather than `100.x` addresses.
 - **`tailscale serve --bg 3000`** for a valid HTTPS certificate inside the
   tailnet. This is a hard requirement, not a convenience: the PWA needs a secure
-  context for service workers, which is what ADR-006 depends on.
+  context for service workers, which is what ADR-006 depends on. `serve`
+  publishes on **443** — the URL is `https://mac-mini.<tailnet>.ts.net`, no port.
+- **NestJS binds `127.0.0.1`**, so `serve` is the only way in (ADR-014).
+- On the Mac, the open-source **`tailscaled`** as a system daemon, not the GUI
+  app — it must run with no user logged in (ADR-015).
+- One shared household Tailscale account on all nodes (ADR-014).
 
 ## Consequences
 
 - Every device using the app must be a tailnet member. One-time setup per phone;
   there is no "send someone a link", and this app has no guests.
-- **Key expiry must be disabled on the Mac node.** An expired server key drops
-  the node off the tailnet silently — the Mac looks fine locally while both
-  phones lose access. Phones keep the default.
+- **Key expiry is disabled on every node.** An expired server key drops the Mac
+  off the tailnet silently — it looks fine locally while both phones lose
+  access. With one shared account, re-authenticating a phone would mean typing
+  that account's credentials into it, so phones are exempted too (ADR-014).
 - Sign-up must use a public-domain address (Gmail/Apple). A custom domain is
   classified as business use and enrolled in a trial instead.
 - Tailscale is a third party in the connection path, though not the data path.

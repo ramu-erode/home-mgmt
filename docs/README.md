@@ -16,23 +16,29 @@ body text into the vault.
 |---|---|
 | 001 | `/knowledge/decisions/self-host-vs-managed-backend.md` |
 | 002 | `/knowledge/decisions/postgres-over-sqlite-for-money.md` |
-| 003 | `/knowledge/decisions/recurrence-rule-vs-materialised-occurrences.md` |
-| 004 | `/knowledge/guidelines/tailscale-for-self-hosted-services.md` |
+| 003, 010, 011 | `/knowledge/decisions/recurrence-rule-vs-materialised-occurrences.md` |
+| 004, 014 | `/knowledge/guidelines/tailscale-for-self-hosted-services.md` |
 | 005 | `/knowledge/decisions/single-origin-over-cdn-hosting.md` |
-| 006, 007 | `/knowledge/guidelines/offline-first-pwa-sync.md` |
+| 006, 007, 009 | `/knowledge/guidelines/offline-first-pwa-sync.md` |
 | 008 | `/knowledge/decisions/devcontainer-dev-database.md` (decision-ref stub) |
+| 012 | `/knowledge/guidelines/money-as-decimal-strings-exact-arithmetic.md` |
+| 013 | `/knowledge/guidelines/civil-dates-are-strings-not-js-date.md` |
+| 015 | `/knowledge/decisions/self-host-vs-managed-backend.md` |
+| 016 | `/knowledge/decisions/kysely-over-orm-for-sql-heavy-schema.md` (decision-ref stub) |
+| 017 | `/knowledge/decisions/build-in-devcontainer-ship-artifact.md` (decision-ref stub) |
 
 Also binding, without a corresponding ADR:
 
 - `/knowledge/guidelines/launchdaemon-not-brew-services.md` — host services
+  (applied, with FileVault, in ADR-015)
 - `/knowledge/deployment/shared-claude-home-mounts.md` — devcontainer mounts and
   `workspaceFolder`
 
 ## The three decisions that shape everything else
 
-1. **Rule, not rows.** A commitment stores a recurrence; occurrences are
-   generated from it, and regeneration never touches an overridden or settled
-   one. (ADR-003)
+1. **Rule, not rows.** A flow stores a recurrence; the server alone
+   materialises occurrences from it, and regeneration never touches an
+   overridden or settled one. (ADR-003, 009, 010)
 2. **The Mac is the whole backend.** Postgres, API and static bundle on one
    machine, reachable only inside the tailnet. (ADR-001, 004, 005)
 3. **The phone works without the Mac.** Cache-first shell, local IndexedDB,

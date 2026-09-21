@@ -1,6 +1,6 @@
 # ADR-002: Postgres 17, native on macOS, under a LaunchDaemon
 
-- **Status:** Accepted
+- **Status:** Accepted — amended 2026-09-21 by ADR-015 (FileVault)
 - **Date:** 2026-09-21
 - **Source note:** `/knowledge/decisions/postgres-over-sqlite-for-money.md`
 
@@ -37,6 +37,10 @@ in Phase 0 of `docs/PROJECT-PLAN.md`.
 - Postgres is never reachable from the network. Only the NestJS process talks to
   it, over loopback; the API is the only exposed surface, and only inside the
   tailnet (ADR-004).
-- One daemon to supervise, versus SQLite's zero.
+- One daemon to supervise, versus SQLite's zero. With FileVault on (ADR-015)
+  it starts only after the disk is unlocked — after a power cut that needs a
+  person at the Mac.
+- `node-postgres` returns `numeric` and `date` as strings by configuration
+  (ADR-012, ADR-013); the data layer is Kysely with SQL migrations (ADR-016).
 - No tuning. At this volume the database lives in the OS page cache.
 - This is what keeps ADR-001 reversible — Postgres here means Postgres anywhere.
