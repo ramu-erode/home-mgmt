@@ -1,0 +1,17 @@
+/* minmax(0, 1fr): grid tracks otherwise refuse to shrink below their content, and date inputs are wide. */
+.form { display: grid; gap: 0.75rem; }
+.cadence { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
+.cadence button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.months { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; }
+.months button { padding: 0.5rem 0; }
+.months button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.amount-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; align-items: end; }
+.amount-row .remove { grid-column: 1 / -1; justify-self: end; }
+.member-row { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.inline input[type='number'] { width: 4.5rem; display: inline-block; margin: 0 0.3rem; }
+.preview { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; }
+.preview li { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.problems { color: var(--bad); margin: 0; padding-left: 1.1rem; }
+.actions { display: flex; gap: 0.75rem; margin: 1rem 0; }
+.actions .primary { flex: 1; }

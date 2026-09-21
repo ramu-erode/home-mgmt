@@ -1,1 +1,118 @@
-/* You can add global styles to this file, and also import other style files */
+/*
+ * Mobile-first: this runs as an installed PWA on two phones (ADR-006). System
+ * fonts only — nothing fetched from a CDN, so nothing is missing offline.
+ */
+:root {
+  color-scheme: light dark;
+  --bg: #f6f5f1;
+  --surface: #ffffff;
+  --surface-2: #ecebe5;
+  --text: #1c1c1a;
+  --muted: #6b6a64;
+  --line: #deddd6;
+  --accent: #1f5f4a;
+  --on-accent: #ffffff;
+  --ok: #1f6b3a;
+  --ok-bg: #dcefe1;
+  --warn: #7a5200;
+  --warn-bg: #f7ead0;
+  --bad: #a2261c;
+  --bad-bg: #f7dcd8;
+  --shadow: 0 6px 24px rgb(0 0 0 / 0.12);
+  --radius: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141513;
+    --surface: #1d1f1c;
+    --surface-2: #2a2c28;
+    --text: #ecebe6;
+    --muted: #a3a29b;
+    --line: #34362f;
+    --accent: #5fbf98;
+    --on-accent: #0d1a14;
+    --ok: #8fd6a6;
+    --ok-bg: #1f3526;
+    --warn: #f0c979;
+    --warn-bg: #3a2f17;
+    --bad: #f3a097;
+    --bad-bg: #40211d;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font: 16px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
+
+main { padding: 0.75rem 1rem 0; max-width: 40rem; margin: 0 auto; }
+h1 { font-size: 1.4rem; margin: 0; }
+h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 1.25rem 0 0.5rem; }
+.card h2 { margin-top: 0; }
+a { color: var(--accent); }
+
+.bar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: calc(0.6rem + env(safe-area-inset-top)) 1rem 0.6rem;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 700; }
+
+.tabs {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabs a { text-align: center; padding: 0.85rem 0; text-decoration: none; color: var(--muted); font-weight: 500; }
+.tabs a.active { color: var(--accent); }
+
+.page-head { display: flex; justify-content: space-between; align-items: center; margin: 0.25rem 0 0.5rem; }
+
+.card {
+  display: block; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 0.9rem; margin-bottom: 0.75rem;
+}
+
+.muted { color: var(--muted); }
+.hint { color: var(--muted); font-size: 0.85rem; margin: -0.25rem 0 0; }
+.row { display: flex; gap: 0.5rem; align-items: center; }
+
+label { display: grid; gap: 0.3rem; font-size: 0.9rem; color: var(--muted); }
+label.inline { display: block; color: var(--text); }
+label.choice { display: flex; align-items: center; gap: 0.5rem; color: var(--text); }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+legend { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.3rem; }
+
+input, select, button, .button {
+  font: inherit; color: var(--text); min-height: 2.6rem;
+  border: 1px solid var(--line); border-radius: 0.55rem; background: var(--surface);
+}
+input, select { width: 100%; min-width: 0; padding: 0 0.7rem; }
+input[type='checkbox'], input[type='radio'] { width: auto; min-height: auto; }
+button, .button { padding: 0 1rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+button:disabled { opacity: 0.5; cursor: default; }
+.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
+.danger { color: var(--bad); }
+.danger-text { color: var(--bad); }
+.link { border: 0; background: none; color: var(--accent); padding: 0; min-height: auto; }
+.icon { padding: 0 0.7rem; }
+
+.segmented { display: flex; gap: 0.4rem; }
+.segmented.wrap { flex-wrap: wrap; }
+.segmented button { flex: 1; }
+.segmented button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+/* A fixed choice (a saved flow's direction) still reads as the choice. */
+.segmented button.on:disabled { opacity: 0.85; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.chip { font-size: 0.75rem; background: var(--surface-2); border: 1px solid transparent; border-radius: 999px; padding: 0.1rem 0.55rem; color: var(--muted); }
+/* Category chips are outlined so "who" and "what" never read as the same thing. */
+.chip.category { background: transparent; border-color: var(--line); }

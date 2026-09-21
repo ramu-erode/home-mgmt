@@ -1,0 +1,179 @@
+@if (missing()) {
+  <p class="muted">This flow no longer exists. <a routerLink="/flows">Back to flows</a></p>
+} @else if (draft(); as d) {
+  <div class="page-head">
+    <h1>{{ d.isNew ? 'New flow' : d.name || 'Flow' }}</h1>
+    <a routerLink="/flows" class="button">Cancel</a>
+  </div>
+
+  <section class="card form">
+    <label>
+      Name
+      <input [ngModel]="d.name" (ngModelChange)="patch({ name: $event })" name="name" placeholder="e.g. School — Child 1" autocomplete="off" />
+    </label>
+
+    <div class="segmented" role="radiogroup" aria-label="Direction">
+      <button type="button" [class.on]="d.direction === 'OUT'" (click)="patch({ direction: 'OUT' })" [disabled]="!d.isNew">Outgoing</button>
+      <button type="button" [class.on]="d.direction === 'IN'" (click)="patch({ direction: 'IN' })" [disabled]="!d.isNew">Income</button>
+    </div>
+    @if (!d.isNew) {
+      <p class="hint">Direction cannot change once saved — create a new flow instead.</p>
+    }
+
+    <label>
+      Category
+      <select [ngModel]="d.categoryId" (ngModelChange)="patch({ categoryId: $event })" name="category">
+        <option [ngValue]="null">None</option>
+        @for (node of household.categoryTree(); track node.category.id) {
+          <option [ngValue]="node.category.id">{{ node.category.name }}</option>
+          @for (child of node.children; track child.id) {
+            <option [ngValue]="child.id">&nbsp;&nbsp;{{ node.category.name }} › {{ child.name }}</option>
+          }
+        }
+      </select>
+    </label>
+  </section>
+
+  <section class="card form">
+    <h2>When</h2>
+    <div class="cadence" role="radiogroup" aria-label="Cadence">
+      @for (c of cadences; track c.value) {
+        <button type="button" [class.on]="d.cadence === c.value" (click)="patch({ cadence: c.value })">{{ c.label }}</button>
+      }
+    </div>
+
+    @switch (d.cadence) {
+      @case ('MONTHLY') {
+        <label class="inline">
+          Every
+          <input type="number" min="1" max="24" [ngModel]="d.interval" (ngModelChange)="patch({ interval: +$event })" name="interval" />
+          month(s), on day
+          <input type="number" min="1" max="31" [ngModel]="d.dayOfMonth" (ngModelChange)="patch({ dayOfMonth: +$event })" name="day" />
+        </label>
+        <p class="hint">Counted from the start date's month. Day 31 means the last day of every month.</p>
+      }
+      @case ('YEARLY') {
+        <label class="inline">
+          Every
+          <input type="number" min="1" max="10" [ngModel]="d.interval" (ngModelChange)="patch({ interval: +$event })" name="interval" />
+          year(s), on day
+          <input type="number" min="1" max="31" [ngModel]="d.dayOfMonth" (ngModelChange)="patch({ dayOfMonth: +$event })" name="day" />
+        </label>
+        <p class="hint">In the start date's month.</p>
+      }
+      @case ('MONTHS') {
+        <div class="months" role="group" aria-label="Months">
+          @for (m of months; track m.value) {
+            <button type="button" [class.on]="d.months.includes(m.value)" (click)="toggleMonth(m.value)">{{ m.label }}</button>
+          }
+        </div>
+        <label class="inline">
+          On day
+          <input type="number" min="1" max="31" [ngModel]="d.dayOfMonth" (ngModelChange)="patch({ dayOfMonth: +$event })" name="day" />
+        </label>
+        <p class="hint">For term fees: the months a bill arrives, e.g. June, October and February.</p>
+      }
+    }
+
+    <div class="dates">
+      <label>
+        {{ d.cadence === 'ONE_OFF' ? 'On' : 'From' }}
+        <input type="date" [ngModel]="d.startDate" (ngModelChange)="patch({ startDate: $event })" name="start" />
+      </label>
+      @if (d.cadence !== 'ONE_OFF') {
+        <label>
+          Until (optional)
+          <input type="date" [ngModel]="d.endDate" (ngModelChange)="patch({ endDate: $event })" name="end" />
+        </label>
+      }
+    </div>
+  </section>
+
+  <section class="card form">
+    <h2>Amount</h2>
+    @for (a of d.amounts; track a.id; let i = $index) {
+      <div class="amount-row">
+        <label>
+          {{ i === 0 ? 'Amount' : 'Then' }}
+          <input inputmode="decimal" [ngModel]="a.amountText" (ngModelChange)="updateAmount(i, { amountText: $event })" [name]="'amount' + i" placeholder="0.00" autocomplete="off" />
+        </label>
+        <label>
+          from
+          <input type="date" [ngModel]="a.effectiveFrom" (ngModelChange)="updateAmount(i, { effectiveFrom: $event })" [name]="'from' + i" />
+        </label>
+        @if (d.amounts.length > 1) {
+          <button type="button" class="link remove" (click)="removeAmount(i)" aria-label="Remove this amount">Remove</button>
+        }
+      </div>
+    }
+    <button type="button" class="link" (click)="addAmount()">+ Add a fee change</button>
+    <p class="hint">A known rise — "₹42,000 from June 2027" — goes here. Nothing is ever guessed.</p>
+  </section>
+
+  <section class="card form">
+    <h2>{{ d.direction === 'OUT' ? 'Who is it for?' : 'Whose income?' }}</h2>
+    <div class="segmented" role="radiogroup" aria-label="Split">
+      <button type="button" [class.on]="d.split === 'household'" (click)="setSplit('household')">Household</button>
+      <button type="button" [class.on]="d.split === 'members'" (click)="setSplit('members')">Specific people</button>
+    </div>
+    @if (d.split === 'household') {
+      <p class="hint">Not split between anyone — the house insurance, the internet bill.</p>
+    } @else {
+      @for (m of household.members(); track m.id) {
+        <div class="member-row">
+          <label class="choice"><input type="checkbox" [checked]="weightOf(m.id) !== null" (change)="toggleMember(m.id)" /> {{ m.name }}</label>
+          @if (weightOf(m.id) !== null && d.allocations.length > 1) {
+            <label class="inline">
+              share
+              <input type="number" min="1" [ngModel]="weightOf(m.id)" (ngModelChange)="setWeight(m.id, +$event)" [name]="'w' + m.id" />
+            </label>
+          }
+        </div>
+      }
+      <p class="hint">A fee charged per person — swimming, school — is better as one flow per person. Shares are for one bill that covers several people.</p>
+    }
+  </section>
+
+  <section class="card">
+    <h2>Next due</h2>
+    @if (problems().length) {
+      <ul class="problems">
+        @for (p of problems(); track p) { <li>{{ p }}</li> }
+      </ul>
+    } @else if (preview(); as p) {
+      @if (p.error) {
+        <p class="problems">{{ p.error }}</p>
+      } @else {
+        <ol class="preview">
+          @for (x of p.dates; track x.date) {
+            <li><span>{{ formatDate(x.date) }}</span><span>{{ formatMoney(x.amount) }}</span></li>
+          } @empty {
+            <li class="muted">Nothing falls due from today.</li>
+          }
+        </ol>
+      }
+    }
+  </section>
+
+  <div class="actions">
+    <button type="button" class="primary" (click)="save()" [disabled]="problems().length > 0 || saving()">Save</button>
+    @if (!d.isNew) {
+      <button type="button" class="danger" (click)="remove()">Delete</button>
+    }
+  </div>
+
+  @if (!d.isNew) {
+    <section class="card form">
+      <h2>Duplicate for someone else</h2>
+      <div class="row">
+        <select [ngModel]="duplicateMember()" (ngModelChange)="duplicateMember.set($event)" name="dupMember">
+          <option [ngValue]="null">Choose a person</option>
+          @for (m of household.members(); track m.id) { <option [ngValue]="m.id">{{ m.name }}</option> }
+        </select>
+        <button type="button" (click)="duplicate()" [disabled]="!duplicateMember()">Duplicate</button>
+      </div>
+    </section>
+  }
+} @else {
+  <p class="muted">Loading…</p>
+}

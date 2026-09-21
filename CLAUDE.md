@@ -99,7 +99,17 @@ expectation must be re-derived by hand, not copied from the engine's output.
 Production Postgres is native on the always-on Mac under a LaunchDaemon
 (ADR-002) and is never reachable from here (ADR-008).
 
+**The web app** reads IndexedDB only (`apps/web/src/app/data/`): `Household`
+exposes live signals, `LocalStore` is the only writer (row + outbox in one
+Dexie transaction), `SyncService` is the only caller of the network. The dev
+server proxies `/api` to `:3000`. Web tests run on fake-indexeddb against a
+real Dexie.
+
 ## Conventions
+
+- **Dexie live queries only read.** A write inside `liveQuery` throws, and an
+  errored subscription never recovers — the signal silently freezes. Mint ids
+  and defaults outside the query.
 
 - **Money:** storage `numeric(14,2)`; every boundary (DTO, JSON, Dexie,
   signals) a two-decimal string, branded `Money`; arithmetic big.js inside

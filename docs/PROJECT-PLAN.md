@@ -272,6 +272,13 @@ browser.
 
 ### Phase 3 — App shell, local-first data, flows
 
+> **Built 2026-09-21 except the last bullet.** Local-first data layer, sync,
+> device setup, flow list and editor, members, categories. Driven end to end in
+> headless Chromium at phone size against the production build and the dev API:
+> a flow created on the "phone" materialised on the server with month-end
+> clamping. Entering the real household flows is the owner's step, once the Mac
+> exists — until then there is nowhere durable to put them.
+
 - Angular workspace, signals-based state, routing (eager), layout.
 - **Dexie schema and repository service — the UI's only data source from the
   first screen.** Minimal sync: full pull on start, outbox pushed immediately
