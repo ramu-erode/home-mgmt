@@ -37,22 +37,24 @@ export default [
                         //
                         // libs/core is the projection engine: project(), cashflow(),
                         // sinkingFund(). ADR-003 requires it to stay pure TypeScript with
-                        // no I/O and no framework imports, so it can run client-side in v1
-                        // and move to the server unchanged.
+                        // no I/O and no framework imports, so the server can materialise
+                        // with it and phones can preview with it, unchanged (ADR-009).
                         //
                         // allowedExternalImports is a WHITELIST, not a ban list. Anything
                         // not named here fails lint — including every HTTP client, ORM and
                         // filesystem wrapper, and both frameworks, without having to
                         // enumerate them. Adding an entry should be a deliberate act.
                         //
-                        //   rrule  — recurrence expansion (ADR-003 RRULE kind)
+                        //   big    — exact decimal arithmetic for money (ADR-012)
                         //   vitest — test files only; specs live inside the project
                         //
-                        // A date library goes here if and when one is chosen.
+                        // No date library, and no rrule: dates are civil-date strings with
+                        // a small in-house helper (ADR-013). JS Date is banned in
+                        // libs/core/eslint.config.mjs.
                         {
                             sourceTag: "scope:core",
                             onlyDependOnLibsWithTags: ["scope:shared"],
-                            allowedExternalImports: ["rrule", "vitest"]
+                            allowedExternalImports: ["big.js", "vitest"]
                         },
 
                         // libs/shared is DTOs and types. It depends on nothing at all —

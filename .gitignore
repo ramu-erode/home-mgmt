@@ -9,6 +9,10 @@ coverage/
 .env
 .devcontainer/.env
 
+# Real household data never enters git — seeds and fixtures are synthetic.
+# A private seed goes in e.g. seed.local.sql.
+*.local.*
+
 # Claude: ship reviewable artifacts, keep session state out.
 .claude/*
 !.claude/settings.json

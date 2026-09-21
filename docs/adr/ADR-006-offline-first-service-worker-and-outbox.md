@@ -1,6 +1,6 @@
 # ADR-006: Offline-first — service worker shell + IndexedDB outbox
 
-- **Status:** Accepted
+- **Status:** Accepted — amended 2026-09-21 by ADR-009 (sync protocol) and the Phase 3 local-first sequencing
 - **Date:** 2026-09-21
 - **Source note:** `/knowledge/guidelines/offline-first-pwa-sync.md`
 
@@ -26,15 +26,16 @@ lazy, so nothing can be missing offline. No `dataGroups` on `/api/*`.
 **Data** — Dexie over IndexedDB as the read model, plus an outbox of pending
 mutations. The UI never calls the network directly.
 
-**Sync**
+**Sync** — specified in ADR-009: a server `version` cursor, last-write-wins
+on `client_updated_at` for human-authored tables, commands (not upserts) for
+occurrences, which only the server creates, and protocol versioning.
 
-```
-GET  /api/sync?since=<iso8601>  → { serverTime, changes: { <table>: Row[] } }
-POST /api/sync                  → { operations: Operation[] } → { applied, rejected }
-```
-
-`Operation = { id, table, op: 'upsert'|'delete', payload, clientUpdatedAt }`.
-Conflict resolution is last-write-wins on `updated_at`.
+**Sequencing.** The UI is local-first **from Phase 3**: Dexie and the
+repository service are the only data source from the first screen, with a
+minimal online sync. Phase 5 adds only what is genuinely offline — service
+worker prefetch, outbox retry, pending and last-synced indicators, stale-cursor
+reset, install, and the drill. A "repository swap" late in the plan would have
+rewritten every screen.
 
 ## Consequences
 
@@ -46,7 +47,9 @@ Conflict resolution is last-write-wins on `updated_at`.
 - **The app must be installed to the home screen**, not used in a Safari tab.
   Safari evicts IndexedDB for sites not visited recently; installed web apps are
   exempt. For an app holding unsynced writes this is a data-loss issue.
-- **The UI must show pending sync state.** Unsynced edits live only on the
-  phone; if the Mac is off for a week and the phone is lost, that week is gone.
+- **The UI must show pending sync state, rejections and last-synced time.**
+  Unsynced edits live only on the phone; if the Mac is off for a week and the
+  phone is lost, that week is gone. With FileVault on (ADR-015) "the Mac is
+  down" persists until someone unlocks it, so it must be visible.
 - Phase 5 is not complete until the drill in the source note passes on a real
   device — Mac off, app force-quit, airplane mode, app opens and shows data.
