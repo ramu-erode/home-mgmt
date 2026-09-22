@@ -82,6 +82,13 @@ a { color: var(--accent); }
 }
 .brand { font-weight: 700; }
 
+.update {
+  display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;
+  margin: 0.75rem 1rem 0; padding: 0.6rem 0.8rem; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--accent);
+}
+.update button { min-height: 2.2rem; }
+
 .tabs {
   position: fixed; bottom: 0; left: 0; right: 0;
   display: grid; grid-template-columns: repeat(5, 1fr);

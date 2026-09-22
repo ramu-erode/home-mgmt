@@ -12,6 +12,17 @@ const PERIODIC_MS = 60_000;
 const KICK_DEBOUNCE_MS = 300;
 
 /**
+ * How long to wait before retrying after `failures` consecutive failed rounds:
+ * quick at first (a blip, a phone waking up), then slower, capped at five
+ * minutes. Foregrounding the app or the network returning always retries at
+ * once, whatever the backoff says.
+ */
+export function retryDelay(failures: number): number {
+  const steps = [5_000, 15_000, 30_000, 60_000, 120_000, 300_000];
+  return steps[Math.min(Math.max(failures, 1), steps.length) - 1];
+}
+
+/**
  * Push the outbox, then pull deltas (ADR-009).
  *
  * - Push first, so a pull never brings back the server's old copy of a row the
@@ -45,12 +56,27 @@ export class SyncService {
   private running: Promise<void> | null = null;
   private again = false;
   private kickTimer: ReturnType<typeof setTimeout> | null = null;
+  private nextTimer: ReturnType<typeof setTimeout> | null = null;
+  private failures = 0;
 
-  /** Starts background syncing: now, when the network returns, and every minute. */
+  /**
+   * Starts syncing: now; whenever the app comes to the foreground or the
+   * network returns; then every minute while it works, backing off while the
+   * Mac is unreachable. An installed iOS web app gets no background sync, so
+   * foregrounding is the trigger that matters.
+   */
   start(): void {
     void this.run();
     globalThis.addEventListener?.('online', () => void this.run());
-    setInterval(() => void this.run(), PERIODIC_MS);
+    globalThis.document?.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') void this.run();
+    });
+  }
+
+  /** Cancels scheduled rounds (tests, teardown). */
+  stop(): void {
+    for (const t of [this.kickTimer, this.nextTimer]) if (t) clearTimeout(t);
+    this.kickTimer = this.nextTimer = null;
   }
 
   /** Called after every local write; coalesces bursts of edits into one round. */
@@ -88,6 +114,16 @@ export class SyncService {
       const next = await this.round();
       this._status.set(next);
     } while (this.again);
+    this.scheduleNext();
+  }
+
+  /** The next unprompted round: a minute after success, backing off after failure, never after a 426. */
+  private scheduleNext(): void {
+    if (this.nextTimer) clearTimeout(this.nextTimer);
+    const status = this._status();
+    if (status === 'update-required') return;
+    this.failures = status === 'idle' ? 0 : this.failures + 1;
+    this.nextTimer = setTimeout(() => void this.run(), this.failures ? retryDelay(this.failures) : PERIODIC_MS);
   }
 
   private async round(): Promise<SyncStatus> {

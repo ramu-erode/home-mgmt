@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { addMonths, dayInMonth, monthOf } from '@home-mgmt/core';
 import { Household } from '../data/household';
 import { formatDay, formatMoney, formatMonth } from '../format';
+import { InstallCard } from '../shell/install-card';
 import { ForecastService } from './forecast.service';
 
 /**
@@ -12,7 +13,7 @@ import { ForecastService } from './forecast.service';
  */
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink],
+  imports: [RouterLink, InstallCard],
   template: `
     <section class="hero card">
       <span class="label">Set aside this month</span>
@@ -22,6 +23,8 @@ import { ForecastService } from './forecast.service';
         <a routerLink="/reserve">Why</a>
       </span>
     </section>
+
+    <app-install-card />
 
     @if (!forecast.hasSnapshot()) {
       <p class="hint">No balance entered yet — the forecast starts from ₹0, and assumes nothing is already set aside.</p>

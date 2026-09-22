@@ -1,5 +1,6 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { SyncService } from '../data/sync.service';
+import { UpdateService } from './update.service';
 
 /**
  * Sync state, always visible (ADR-006): unsynced edits live only on this phone
@@ -43,6 +44,7 @@ import { SyncService } from '../data/sync.service';
 })
 export class SyncBadge {
   protected readonly sync = inject(SyncService);
+  private readonly update = inject(UpdateService);
   protected readonly open = signal(false);
   private readonly now = signal(Date.now());
 
@@ -95,6 +97,6 @@ export class SyncBadge {
   });
 
   protected reload(): void {
-    location.reload();
+    void this.update.apply();
   }
 }

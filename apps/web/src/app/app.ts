@@ -4,6 +4,7 @@ import { Household } from './data/household';
 import { SyncService } from './data/sync.service';
 import { DeviceSetup } from './shell/device-setup';
 import { SyncBadge } from './shell/sync-badge';
+import { UpdateService } from './shell/update.service';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +14,13 @@ import { SyncBadge } from './shell/sync-badge';
       <span class="brand">Home Mgmt</span>
       <app-sync-badge />
     </header>
+
+    @if (update.ready() || update.broken()) {
+      <div class="update" role="status">
+        <span>{{ update.broken() ? 'The app needs to reload to recover.' : 'A new version is ready.' }}</span>
+        <button type="button" class="primary" (click)="update.apply()">Reload</button>
+      </div>
+    }
 
     @if (household.deviceReady()) {
       <main><router-outlet /></main>
@@ -33,6 +41,7 @@ import { SyncBadge } from './shell/sync-badge';
 export class App {
   protected readonly household = inject(Household);
   protected readonly sync = inject(SyncService);
+  protected readonly update = inject(UpdateService);
 
   constructor() {
     this.sync.start();
