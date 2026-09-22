@@ -6,7 +6,7 @@ import { DbModule } from '../db/db.module';
 import { ForecastController } from '../forecast/forecast.controller';
 import { HealthController } from '../health/health.controller';
 import { HouseholdTime } from '../household-time';
-import { HorizonRollService } from '../regeneration/horizon-roll.service';
+import { DailyJobsService } from '../regeneration/daily-jobs.service';
 import { RegenerationService } from '../regeneration/regeneration.service';
 import { SyncController } from '../sync/sync.controller';
 import { SyncService } from '../sync/sync.service';
@@ -29,7 +29,7 @@ export class AppModule {
         { provide: APP_GUARD, useClass: TailnetGuard },
         HouseholdTime,
         RegenerationService,
-        HorizonRollService,
+        DailyJobsService,
         SyncService,
       ],
     };
