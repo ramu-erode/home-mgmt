@@ -320,6 +320,22 @@ to set aside this month.
 
 ### Phase 5 — Offline
 
+> **Built 2026-09-22; the real-device drill waits for the Mac.** Service worker
+> (prefetch everything, API never cached, `/api/**` excluded from navigation),
+> manifest and icons, persistent-storage request, install card, update banner,
+> 426 → look for the new bundle, sync on foreground/online with backoff. The
+> drill was run in headless Chromium against the production build — Mac
+> stopped, page closed, browser offline: the app reopened from cache with the
+> same figures, deep links worked, an offline edit showed as unsynced, reached
+> the Mac on reconnect and appeared on a second phone. An update deployed under
+> a running app raised the banner and swapped cleanly. **The done-criterion is
+> the drill on a real phone**, installed to the home screen (Safari's eviction
+> and iOS standalone behaviour cannot be emulated) — that stays open.
+>
+> The initial-bundle warning budget is 600 kB, not the default 500 kB: every
+> route is eager by design (ADR-006), and the phone downloads it once — 152 kB
+> gzipped — before the service worker serves it from cache.
+
 - `ngsw-config.json`: prefetch the shell **and** all routes; no `dataGroups` on
   the API.
 - Outbox retry with backoff; rejections surfaced with reasons.

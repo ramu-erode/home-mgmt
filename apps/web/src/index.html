@@ -7,8 +7,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1f5f4a" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- Installed to the home screen (ADR-006): Safari evicts site data for
+         sites not visited recently; installed web apps are exempt. -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Home Mgmt" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   </head>
   <body>
     <app-root></app-root>
+    <noscript>Home Mgmt needs JavaScript.</noscript>
   </body>
 </html>

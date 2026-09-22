@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { App } from './app';
 import { ApiClient } from './data/api-client';
 import { LocalDb } from './data/local-db';
@@ -16,6 +17,7 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter([]),
+        provideServiceWorker('ngsw-worker.js', { enabled: false }),
         { provide: LOCAL_DB, useValue: db },
         // The Mac is unreachable: the app must still open.
         { provide: ApiClient, useValue: { push: async () => ({ kind: 'offline' }), pull: async () => ({ kind: 'offline' }) } },
@@ -24,6 +26,7 @@ describe('App', () => {
   });
 
   afterEach(async () => {
+    TestBed.inject(SyncService).stop();
     db.close();
     await db.delete();
   });

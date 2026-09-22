@@ -3,7 +3,7 @@ import type { Operation, PullResponse, PushResponse, SyncRow } from '@home-mgmt/
 import { ApiClient, type ApiResult } from './api-client';
 import { LocalDb } from './local-db';
 import { LocalStore } from './local-store';
-import { LOCAL_DB, SyncService } from './sync.service';
+import { LOCAL_DB, retryDelay, SyncService } from './sync.service';
 
 /**
  * The phone's half of ADR-009, against a real Dexie on fake-indexeddb and a
@@ -47,6 +47,7 @@ describe('local-first data layer', () => {
   });
 
   afterEach(async () => {
+    sync.stop();
     db.close();
     await db.delete();
   });
@@ -139,6 +140,10 @@ describe('local-first data layer', () => {
       expect(await db.outbox.count()).toBe(1);
       await sync.run();
       expect(api.pushes).toHaveLength(1); // no retry until reload
+    });
+
+    it('backs off quickly, then slowly, capped at five minutes', () => {
+      expect([1, 2, 3, 4, 5, 6, 7, 50].map(retryDelay)).toEqual([5_000, 15_000, 30_000, 60_000, 120_000, 300_000, 300_000, 300_000]);
     });
 
     it('keeps a stable device id across calls', async () => {
