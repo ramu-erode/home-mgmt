@@ -43,11 +43,13 @@ export class Household {
 
   readonly occurrences = liveSignal(async () => (await this.db.occurrence.toArray()).filter(isLive), []);
 
-  /** The projection anchor: the latest live balance snapshot (ADR-011). */
-  readonly snapshot = liveSignal(async () => {
-    const all = (await this.db.balanceSnapshot.toArray()).filter(isLive);
-    return all.sort((a, b) => b.asOf.localeCompare(a.asOf))[0] ?? null;
-  }, null as BalanceSnapshotRow | null);
+  /** Live balance snapshots, newest first; the first anchors the forecast (ADR-011). */
+  readonly snapshots = liveSignal(
+    async () => (await this.db.balanceSnapshot.toArray()).filter(isLive).sort((a, b) => b.asOf.localeCompare(a.asOf) || b.id.localeCompare(a.id)),
+    [] as BalanceSnapshotRow[],
+  );
+
+  readonly snapshot = computed(() => this.snapshots()[0] ?? null);
 
   readonly goals = liveSignal(async () => (await this.db.goal.toArray()).filter(isLive).sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name)), []);
 

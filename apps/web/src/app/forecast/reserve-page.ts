@@ -1,4 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Household } from '../data/household';
 import { formatDate, formatMoney, formatMonth } from '../format';
 import { ForecastService } from './forecast.service';
@@ -10,13 +11,14 @@ import { ForecastService } from './forecast.service';
  */
 @Component({
   selector: 'app-reserve-page',
+  imports: [RouterLink],
   template: `
     <div class="page-head"><h1>Reserve</h1></div>
 
     <div class="tiles">
       <div class="tile"><span class="label">This month</span><span class="value">{{ formatMoney(r().thisMonth) }}</span></div>
       <div class="tile"><span class="label">Steady state</span><span class="value">{{ formatMoney(r().steadyState) }}</span></div>
-      <div class="tile"><span class="label">Already set aside</span><span class="value">{{ formatMoney(forecast.anchor().reservedAmount) }}</span></div>
+      <a class="tile" routerLink="/balance"><span class="label">Already set aside</span><span class="value">{{ formatMoney(forecast.anchor().reservedAmount) }}</span></a>
     </div>
     <p class="hint">
       "This month" includes catching up on bills nothing has been saved for yet; it falls towards the steady state month by month.
@@ -54,7 +56,7 @@ import { ForecastService } from './forecast.service';
   `,
   styles: `
     .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: 0.5rem; }
-    .tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.6rem 0.7rem; display: grid; }
+    .tile { text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.6rem 0.7rem; display: grid; }
     .tile .label { font-size: 0.78rem; color: var(--muted); }
     .tile .value { font-weight: 600; overflow-wrap: anywhere; }
     .hint { margin-bottom: 0.75rem; }

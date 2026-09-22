@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
   template: `
     <div class="page-head"><h1>More</h1></div>
     <nav class="card links">
+      <a routerLink="/balance">Balance <span class="muted">— where the forecast starts</span></a>
       <a routerLink="/reserve">Reserve <span class="muted">— how the monthly figure is worked out</span></a>
       <a routerLink="/goals">Goals</a>
       <a routerLink="/members">Members</a>

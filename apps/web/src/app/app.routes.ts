@@ -7,6 +7,8 @@ import { GoalsPage } from './forecast/goals-page';
 import { HomePage } from './forecast/home-page';
 import { MonthPage } from './forecast/month-page';
 import { ReservePage } from './forecast/reserve-page';
+import { BalancePage } from './entry/balance-page';
+import { PaymentPage } from './entry/payment-page';
 import { MembersPage } from './members/members-page';
 import { MorePage } from './shell/more-page';
 
@@ -21,6 +23,8 @@ export const appRoutes: Route[] = [
   { path: 'cashflow', component: CashflowPage, title: 'Cashflow' },
   { path: 'reserve', component: ReservePage, title: 'Reserve' },
   { path: 'goals', component: GoalsPage, title: 'Goals' },
+  { path: 'balance', component: BalancePage, title: 'Balance' },
+  { path: 'income/new', component: PaymentPage, title: 'Expected payment' },
   { path: 'flows', component: FlowList, title: 'Flows' },
   { path: 'flows/:id', component: FlowEditor, title: 'Flow' },
   { path: 'members', component: MembersPage, title: 'Members' },

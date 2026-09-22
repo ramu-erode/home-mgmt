@@ -1,0 +1,66 @@
+<div class="page-head">
+  <h1>Goals</h1>
+  @if (!editing()) { <button type="button" class="primary" (click)="startNew()">Add</button> }
+</div>
+
+@if (error(); as e) {
+  <p class="card warning">{{ e }}. Update the <a routerLink="/balance">balance</a> or lower what is saved.</p>
+}
+
+@if (editing(); as e) {
+  <section class="card form">
+    <h2>{{ editingIsNew() ? 'New goal' : 'Edit goal' }}</h2>
+    <label>Name <input [ngModel]="e.name" (ngModelChange)="patch({ name: $event })" name="gname" placeholder="e.g. Car" autocomplete="off" /></label>
+    <div class="pair">
+      <label>Target <input inputmode="decimal" [ngModel]="e.targetText" (ngModelChange)="patch({ targetText: $event })" name="gtarget" placeholder="0.00" autocomplete="off" /></label>
+      <label>By <input type="date" [ngModel]="e.targetDate" (ngModelChange)="patch({ targetDate: $event })" name="gdate" /></label>
+    </div>
+    <div class="pair">
+      <label>Saved so far <input inputmode="decimal" [ngModel]="e.savedText" (ngModelChange)="patch({ savedText: $event })" name="gsaved" placeholder="0.00" autocomplete="off" /></label>
+      <label>
+        For
+        <select [ngModel]="e.memberId" (ngModelChange)="patch({ memberId: $event })" name="gmember">
+          <option [ngValue]="null">Household</option>
+          @for (m of household.members(); track m.id) { <option [ngValue]="m.id">{{ m.name }}</option> }
+        </select>
+      </label>
+    </div>
+    @if (problems().length) {
+      <ul class="problems">@for (p of problems(); track p) { <li>{{ p }}</li> }</ul>
+    }
+    <div class="row">
+      <button type="button" class="primary" (click)="save()" [disabled]="problems().length > 0">Save</button>
+      <button type="button" (click)="editing.set(null)">Cancel</button>
+    </div>
+  </section>
+}
+
+@for (g of goals(); track g.row.id; let first = $first; let last = $last) {
+  <section class="card goal">
+    <div class="line"><strong>{{ g.row.name }}</strong><span>{{ formatMoney(g.row.targetAmount) }}</span></div>
+    <div class="meter" role="meter" [attr.aria-valuenow]="g.percent" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="g.row.name + ' saved'">
+      <div class="fill" [class.behind]="g.slipping" [style.width.%]="g.percent"></div>
+    </div>
+    <div class="line muted"><span>{{ formatMoney(g.row.savedAmount) }} saved</span><span>by {{ formatDate(g.row.targetDate) }}</span></div>
+    @if (g.required) {
+      <p class="plan">This month: {{ formatMoney(g.funded ?? zero) }} of {{ formatMoney(g.required) }} needed.</p>
+    }
+    <p class="status" [class.bad]="g.slipping"><span aria-hidden="true">{{ g.slipping ? '⚠' : '✓' }}</span> {{ g.verdict }}</p>
+    <div class="topup">
+      <input inputmode="decimal" [ngModel]="topUp()[g.row.id] ?? ''" (ngModelChange)="setTopUp(g.row.id, $event)" [name]="'top' + g.row.id" placeholder="Amount" aria-label="Amount to add to saved" autocomplete="off" />
+      <button type="button" (click)="addSaved(g.row)">Add to saved</button>
+    </div>
+    <div class="tools">
+      <button type="button" class="icon" (click)="move(g.row, -1)" [disabled]="first" aria-label="Fund earlier">↑</button>
+      <button type="button" class="icon" (click)="move(g.row, 1)" [disabled]="last" aria-label="Fund later">↓</button>
+      <button type="button" class="link" (click)="startEdit(g.row)">Edit</button>
+      <button type="button" class="link danger-text" (click)="remove(g.row)">Remove</button>
+    </div>
+  </section>
+} @empty {
+  @if (!editing()) { <p class="muted">No goals yet — a car, a trip, an emergency fund.</p> }
+}
+
+@if (goals().length > 1) {
+  <p class="hint">Goals higher in the list are funded first, after bills.</p>
+}

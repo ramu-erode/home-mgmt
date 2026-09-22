@@ -350,6 +350,14 @@ Mac returns ([ADR-006](adr/ADR-006-offline-first-service-worker-and-outbox.md)).
 
 ### Phase 6 — Income and goals completion
 
+> **Built 2026-09-22.** Balance entry with the three-way split shown as you
+> type (and a split that does not add up refused, with the reason), snapshot
+> history; goals — add, edit, add to saved, reorder priority, remove; a quick
+> add for an expected contracting payment (a one-off income flow, defaulting to
+> a "Contracting" category). Confidence-split cashflow lines already shipped in
+> Phase 4. Checked in the browser against the server: the extra ₹10,000 set
+> aside lowered "this month" by exactly ₹10,000.
+
 - IN flows in the editor; quick-add for an expected contracting payment.
 - Confidence-split cashflow lines (confirmed vs all).
 - Balance snapshot entry with the three-way split (reserved, goals, free).
