@@ -365,6 +365,12 @@ Mac returns ([ADR-006](adr/ADR-006-offline-first-service-worker-and-outbox.md)).
 
 ### Phase 7 — Hardening
 
+> **Purge built 2026-09-22.** The tombstone purge runs with the daily jobs,
+> keeps tombstones that surviving rows reference, and raises the watermark;
+> tested against its own database. The rest of this phase is about the Mac —
+> deploy script, backup script and LaunchDaemons are written against the real
+> machine, not before it.
+
 - Second restore drill, from the scheduled backups this time.
 - Tombstone purge job (180 days) with `min_retained_version`.
 - Deploy script hardened: expand/contract check, automatic rollback on failed

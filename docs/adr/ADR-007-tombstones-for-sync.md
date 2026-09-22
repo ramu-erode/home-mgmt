@@ -32,9 +32,14 @@ The general form of this problem is in the source note.
 3. `GET /api/sync` returns tombstoned rows so clients can remove them locally.
 4. Every normal query filters `deleted_at IS NULL`, enforced in the repository
    layer rather than at each call site.
-5. A monthly job hard-deletes tombstones older than 180 days and records
+5. A job hard-deletes tombstones older than 180 days and records
    `min_retained_version`; a pull older than that gets `resetRequired`
-   (ADR-009).
+   (ADR-009). *Built in Phase 7:* it runs with the daily horizon roll rather
+   than monthly (the cutoff decides what goes, so daily removes nothing
+   extra), and it never removes a tombstone a surviving row still references
+   — a deleted flow outlives its settled history, a removed member outlives
+   the goals and allocations that name them. The watermark is the highest
+   version purged.
 
 ## Consequences
 
