@@ -27,7 +27,10 @@ import { ForecastService } from './forecast.service';
     <app-install-card />
 
     @if (!forecast.hasSnapshot()) {
-      <p class="hint">No balance entered yet — the forecast starts from ₹0, and assumes nothing is already set aside.</p>
+      <a class="card start" routerLink="/balance">
+        <strong>Start from your real balance</strong>
+        <span class="muted">Until then the forecast starts from ₹0 and assumes nothing is set aside.</span>
+      </a>
     }
 
     @if (forecast.tightMonths().length) {
@@ -53,6 +56,7 @@ import { ForecastService } from './forecast.service';
       } @empty {
         <p class="muted">Nothing due.</p>
       }
+      <a class="add" routerLink="/income/new">+ Expected payment</a>
     </section>
   `,
   styles: `
@@ -64,6 +68,8 @@ import { ForecastService } from './forecast.service';
     .alert { display: flex; gap: 0.6rem; text-decoration: none; color: var(--text); border-color: var(--critical); }
     .alert .icon { color: var(--critical); font-size: 1.1rem; }
     .ok { color: var(--ok); }
+    .start { display: grid; gap: 0.2rem; text-decoration: none; color: var(--text); border-color: var(--accent); }
+    .add { display: inline-block; margin-top: 0.6rem; }
     .head { display: flex; justify-content: space-between; align-items: baseline; }
     .head h2 { margin: 0 0 0.5rem; }
     .soon { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr) auto; gap: 0.6rem; padding: 0.35rem 0; border-top: 1px solid var(--line); }

@@ -24,7 +24,10 @@ interface Card {
 
     @for (group of groups(); track group.title) {
       <section>
-        <h2>{{ group.title }}</h2>
+        <div class="group-head">
+          <h2>{{ group.title }}</h2>
+          @if (group.title === 'Income') { <a routerLink="/income/new">+ Expected payment</a> }
+        </div>
         @for (c of group.cards; track c.view.flow.id) {
           <a class="card flow" [routerLink]="['/flows', c.view.flow.id]">
             <div class="line">
@@ -49,6 +52,8 @@ interface Card {
     .line { display: flex; justify-content: space-between; gap: 1rem; }
     .amount { font-variant-numeric: tabular-nums; white-space: nowrap; }
     .next { font-size: 0.85rem; }
+    .group-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .group-head a { font-size: 0.9rem; }
   `,
 })
 export class FlowList {
