@@ -12,7 +12,8 @@
   // claude-code feature only auto-installs Node (18.x) when none is found, and
   // nvm's is on the system PATH here, so it finds ours and skips that.
   "features": {
-    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
   // MUST be /home-mgmt, not the default /workspace.
@@ -35,6 +36,9 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        // Claude Code panel. The CLI comes from the feature above; this is the
+        // editor UI, and it must be listed here to survive a rebuild.
+        "anthropic.claude-code",
         "angular.ng-template",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
