@@ -2,6 +2,8 @@
 
 - **[PROJECT-PLAN.md](PROJECT-PLAN.md)** — problem, architecture, phased
   delivery, risks, definition of done.
+- **[TESTING-BEFORE-DEPLOY.md](TESTING-BEFORE-DEPLOY.md)** — how to try the app
+  on the laptop, and the drill on real phones, before the Mac exists.
 - **[adr/](adr/)** — architecture decision records. The index with one-line
   summaries is the ADR table in the repo `CLAUDE.md`.
 
